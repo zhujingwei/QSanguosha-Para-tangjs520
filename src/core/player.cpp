@@ -60,6 +60,11 @@ int Player::getLostHp() const{
 }
 
 bool Player::isWounded() const{
+    foreach (const Player *p, getAliveSiblings()) {
+        if (p->phase != NotActive && p->hasLordSkill("guiming") && getKingdom() == "wu")
+            return true;
+    }
+
     if (hp < 0)
         return true;
     else
@@ -140,27 +145,30 @@ int Player::getAttackRange(bool include_weapon) const{
     return real_range;
 }
 
-bool Player::inMyAttackRange(const Player *other, int distance_fix) const
-{
-    if (attack_range_pair.contains(other)) {
-        return true;
+bool Player::inMyAttackRange(const Player *other, int distance_fix) const{
+    // for zhaofu
+
+    foreach (const Player *p, getAliveSiblings()) {
+        if (p->hasLordSkill("zhaofu") && p->distanceTo(other) == 1 && getKingdom() == "wu")
+            return true;
     }
+
+    // end
+    if (attack_range_pair.contains(other)) return true;
     return this != other && distanceTo(other, distance_fix) <= getAttackRange();
 }
 
 void Player::setFixedDistance(const Player *player, int distance)
 {
-    if (distance < 0) {
-        fixed_distance.remove(player, -distance);
-    }
-    else {
+    if (distance == -1)
+        fixed_distance.remove(player);
+    else
         fixed_distance.insert(player, distance);
-    }
 }
 
 void Player::removeFixedDistance(const Player *player, int distance)
 {
-    fixed_distance.remove(player, distance);
+    fixed_distance.remove(player);
 }
 
 void Player::insertAttackRangePair(const Player *player)
@@ -173,19 +181,22 @@ void Player::removeAttackRangePair(const Player *player)
     attack_range_pair.removeOne(player);
 }
 
-int Player::distanceTo(const Player *other, int distance_fix) const
-{
-    if (this == other) {
+int Player::distanceTo(const Player *other, int distance_fix) const{
+    if (other == NULL)
         return 0;
-    }
+
+    if (this == other)
+        return 0;
+
+    if (hasSkill("zhuiji") && other->getHp() < getHp())
+        return 1;
 
     if (fixed_distance.contains(other)) {
         QList<int> distance_list = fixed_distance.values(other);
         int min = 10000;
         foreach (int d, distance_list) {
-            if (min > d) {
+            if (min > d)
                 min = d;
-            }
         }
 
         return min;
@@ -339,6 +350,12 @@ bool Player::hasSkill(const QString &skill_name, bool include_lose) const{
         || acquired_skills.contains(skill_name);
 }
 
+bool Player::hasSkill(const Skill *skill, bool include_lose /* = false */) const
+{
+	Q_ASSERT(skill != NULL);
+	return hasSkill(skill->objectName(), include_lose);
+}
+
 bool Player::hasSkills(const QString &skill_name, bool include_lose) const{
     QStringList skillNames = skill_name.split("|");
     foreach (const QString &skill, skillNames) {
@@ -366,16 +383,8 @@ bool Player::hasInnateSkill(const QString &skill_name) const{
 }
 
 bool Player::hasLordSkill(const QString &skill_name, bool include_lose) const{
-    if (!isLord() && hasSkill("weidi")) {
-        QList<const Player *> aliveSiblings = getAliveSiblings();
-        foreach (const Player *player, aliveSiblings) {
-            if (player->isLord()) {
-                if (player->hasLordSkill(skill_name, true))
-                    return true;
-                break;
-            }
-        }
-    }
+	if (!isLord() && hasSkill("weidi"))
+		return hasSkill(skill_name);
 
     if (!hasSkill(skill_name, include_lose))
         return false;
@@ -394,6 +403,12 @@ bool Player::hasLordSkill(const QString &skill_name, bool include_lose) const{
         return skills.contains(skill_name);
 
     return false;
+}
+
+bool Player::hasLordSkill(const Skill *skill, bool include_lose /* = false */) const
+{
+	Q_ASSERT(skill != NULL);
+	return hasLordSkill(skill->objectName(), include_lose);
 }
 
 void Player::acquireSkill(const QString &skill_name) {
@@ -570,7 +585,7 @@ bool Player::hasArmorEffect(const QString &armor_name) const{
     }
 
     if (armor == NULL && alive) {
-        if (armor_name == "eight_diagram" && hasSkill("bazhen"))
+        if (armor_name == "eight_diagram" && (hasSkill("bazhen") || hasSkill("linglong")))
             return true;
         if (armor_name == "vine" && hasSkill("bossmanjia"))
             return true;
@@ -702,30 +717,25 @@ void Player::setChained(bool chained) {
     }
 }
 
-void Player::addMark(const QString &mark, int add_num)
-{
+void Player::addMark(const QString &mark, int add_num) {
     int value = marks.value(mark, 0);
     value += add_num;
     setMark(mark, value);
 }
 
-void Player::removeMark(const QString &mark, int remove_num)
-{
+void Player::removeMark(const QString &mark, int remove_num) {
     int value = marks.value(mark, 0);
     value -= remove_num;
     value = qMax(0, value);
     setMark(mark, value);
 }
 
-void Player::setMark(const QString &mark, int value)
-{
-    if (marks[mark] != value) {
+void Player::setMark(const QString &mark, int value) {
+    if (marks[mark] != value)
         marks[mark] = value;
-    }
 }
 
-int Player::getMark(const QString &mark) const
-{
+int Player::getMark(const QString &mark) const{
     return marks.value(mark, 0);
 }
 
@@ -735,26 +745,23 @@ QStringList Player::getMarkNames() const
 }
 
 bool Player::canSlash(const Player *other, const Card *slash, bool distance_limit,
-                      int rangefix, const QList<const Player *> &others) const
-{
-    if (other == this || !other->isAlive()) {
+                      int rangefix, const QList<const Player *> &others) const{
+    if (other == NULL)
         return false;
-    }
+
+    if (other == this || !other->isAlive())
+        return false;
 
     Slash *newslash = new Slash(Card::NoSuit, 0);
     newslash->deleteLater();
 #define THIS_SLASH (slash == NULL ? newslash : slash)
-    if (isProhibited(other, THIS_SLASH, others)) {
+    if (isProhibited(other, THIS_SLASH, others))
         return false;
-    }
 
-    if (distance_limit) {
-        int distance = Sanguosha->correctCardTarget(TargetModSkill::DistanceLimit, this, THIS_SLASH);
-        return inMyAttackRange(other, rangefix - distance);
-    }
-    else {
+    if (distance_limit)
+        return inMyAttackRange(other, rangefix - Sanguosha->correctCardTarget(TargetModSkill::DistanceLimit, this, THIS_SLASH));
+    else
         return true;
-    }
 #undef THIS_SLASH
 }
 
@@ -806,6 +813,19 @@ bool Player::pileOpen(const QString &pile_name, const QString &player) const {
 void Player::setPileOpen(const QString &pile_name, const QString &player) {
     if (pile_open[pile_name].contains(player)) return;
     pile_open[pile_name].append(player);
+}
+
+QList<int> Player::getHandPile() const
+{
+	QList<int> result;
+	foreach (const QString &pile, getPileNames()) {
+		if (pile.startsWith("&") || pile == "wooden_ox") {
+			foreach (int id, getPile(pile)) {
+				result.append(id);
+			}
+		}
+	}
+	return result;
 }
 
 void Player::addHistory(const QString &name, int times) {

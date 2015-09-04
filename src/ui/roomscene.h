@@ -126,7 +126,6 @@ class RoomScene : public SanScene {
     Q_OBJECT
 
 public:
-    enum ShefuAskState { ShefuAskAll, ShefuAskNecessary, ShefuAskNone };
 
     explicit RoomScene(QMainWindow *mainWindow);
 
@@ -178,7 +177,6 @@ public:
     bool m_notShowTargetsEnablityAnimation;
 
     bool m_skillButtonSank;
-    ShefuAskState m_ShefuAskState;
 
 public slots:
     void addPlayer(ClientPlayer *player);
@@ -251,7 +249,7 @@ private:
         QString &generalName1, int &skinIndex1, QString &generalName2, int &skinIndex2);
 
     QMap<int, QList<QList<CardItem *> > > _m_cardsMoveStash;
-    Button *add_robot, *fill_robots;
+	Button *add_robot, *fill_robots;
     Button *return_main_menu;
 
     QList<Photo *> photos;
@@ -265,7 +263,7 @@ private:
 
     Window *pindian_box;
     CardItem *pindian_from_card, *pindian_to_card;
-    QGraphicsItem *control_panel;
+	QGraphicsItem *control_panel;
     QMap<PlayerCardContainer *, const ClientPlayer *> item2player;
     QDialog *m_choiceDialog; // Dialog for choosing generals, suits, card/equip, or kingdoms
 
@@ -385,7 +383,8 @@ private:
 
 private slots:
     void fillCards(const QList<int> &card_ids, const QList<int> &disabled_ids = QList<int>());
-    void updateSkillButtons();
+    void updateSkillButtons(bool isPrepare = false);
+    void refashionSkills();
     void acquireSkill(const ClientPlayer *player, const QString &skill_name);
     void updateSelectedTargets();
     void updateTrustButton();
@@ -399,7 +398,7 @@ private slots:
     void setEmotion(const QString &who, const QString &emotion);
     void showSkillInvocation(const QString &who, const QString &skill_name);
     void doAnimation(int name, const QStringList &args);
-    void showOwnerButtons(bool owner);
+	void showOwnerButtons(bool owner);
     void showPlayerCards();
     void updateRolesBox();
     void updateRoles(const QString &roles);

@@ -100,10 +100,6 @@ public:
     virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const;
     virtual const Card *viewAs(const QList<const Card *> &cards) const;
 
-    virtual bool shouldBeVisible(const Player *player) const;
-
-    LuaFunction should_be_visible;
-
     LuaFunction view_filter;
     LuaFunction view_as;
 
@@ -443,7 +439,7 @@ int LuaDistanceSkill::getCorrect(const Player *from, const Player *to) const{
 
 int LuaMaxCardsSkill::getExtra(const Player *target) const{
     if (extra_func == 0)
-        return MaxCardsSkill::getExtra(target);
+        return 0;
 
     lua_State *L = Sanguosha->getLuaState();
 
@@ -466,7 +462,7 @@ int LuaMaxCardsSkill::getExtra(const Player *target) const{
 
 int LuaMaxCardsSkill::getFixed(const Player *target) const{
     if (fixed_func == 0)
-        return MaxCardsSkill::getFixed(target);
+        return 0;
 
     lua_State *L = Sanguosha->getLuaState();
 
@@ -701,30 +697,6 @@ const Card *LuaViewAsSkill::viewAs(const QList<const Card *> &cards) const{
         return card;
     } else
         return NULL;
-}
-
-bool LuaViewAsSkill::shouldBeVisible(const Player *player) const{
-    if (should_be_visible == 0)
-        return ViewAsSkill::shouldBeVisible(player);
-
-    lua_State *L = Sanguosha->getLuaState();
-
-    // the callback
-    lua_rawgeti(L, LUA_REGISTRYINDEX, should_be_visible);
-
-    pushSelf(L);
-
-    SWIG_NewPointerObj(L, player, SWIGTYPE_p_Player, 0);
-
-    int error = lua_pcall(L, 2, 1, 0);
-    if (error) {
-        Error(L);
-        return false;
-    } else {
-        bool result = lua_toboolean(L, -1);
-        lua_pop(L, 1);
-        return result;
-    }
 }
 
 bool LuaViewAsSkill::isEnabledAtPlay(const Player *player) const{

@@ -140,7 +140,8 @@ namespace QSanProtocol {
         S_COMMAND_TOGGLE_READY,
         S_COMMAND_ADD_ROBOT,
         S_COMMAND_FILL_ROBOTS,
-        S_COMMAND_SIGN_UP
+        S_COMMAND_SIGN_UP,
+        S_COMMAND_UPDATE_SKILL
     };
 
     enum GameEventType {
@@ -162,7 +163,8 @@ namespace QSanProtocol {
         S_GAME_EVENT_PAUSE,
         S_GAME_EVENT_REVEAL_PINDIAN,
         S_GAME_EVENT_SET_ANJIANG_NAMES,
-        S_GAME_EVENT_PLAY_PHASE_EFFECT
+        S_GAME_EVENT_PLAY_PHASE_EFFECT,
+        S_GAME_EVENT_REFASHION_SKILL
     };
 
     enum AnimateType {

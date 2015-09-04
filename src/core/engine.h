@@ -164,6 +164,7 @@ public:
 
     QString findConvertFrom(const QString &general_name) const;
     bool isGeneralHidden(const QString &general_name) const;
+	QStringList getSpConvertPairs(const QString &general_name) const;
 
 private:
     void _loadMiniScenarios();

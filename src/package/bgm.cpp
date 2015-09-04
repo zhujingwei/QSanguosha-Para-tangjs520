@@ -18,7 +18,7 @@ public:
                 && resp.m_who != NULL && !resp.m_who->isKongcheng()) {
                 QVariant data = QVariant::fromValue(resp.m_who);
                 if (player->askForSkillInvoke(objectName(), data)) {
-                    room->broadcastSkillInvoke("chongzhen", 1);
+                    player->broadcastSkillInvoke("chongzhen");
                     int card_id = room->askForCardChosen(player, resp.m_who, "h", objectName());
                     CardMoveReason reason(CardMoveReason::S_REASON_EXTRACTION, player->objectName());
                     room->obtainCard(player, Sanguosha->getCard(card_id), reason, false);
@@ -34,7 +34,7 @@ public:
                     bool invoke = player->askForSkillInvoke(objectName(), data);
                     p->setFlags("-ChongzhenTarget");
                     if (invoke) {
-                        room->broadcastSkillInvoke("chongzhen", 2);
+                        player->broadcastSkillInvoke("chongzhen");
                         int card_id = room->askForCardChosen(player, p, "h", objectName());
                         CardMoveReason reason(CardMoveReason::S_REASON_EXTRACTION, player->objectName());
                         room->obtainCard(player, Sanguosha->getCard(card_id), reason, false);
@@ -58,7 +58,7 @@ void LihunCard::onEffect(const CardEffectStruct &effect) const{
     Room *room = effect.from->getRoom();
     effect.to->setFlags("LihunTarget");
     effect.from->turnOver();
-    room->broadcastSkillInvoke("lihun", 1);
+    effect.from->broadcastSkillInvoke("lihun", 1);
 
     DummyCard *dummy_card = new DummyCard(effect.to->handCards());
     if (!effect.to->isKongcheng()) {
@@ -111,7 +111,7 @@ public:
             if (!target || target->getHp() < 1 || diaochan->isNude())
                 return false;
 
-            room->broadcastSkillInvoke(objectName(), 2);
+            diaochan->broadcastSkillInvoke(objectName(), 2);
             DummyCard *to_goback;
             if (diaochan->getCardCount() <= target->getHp()) {
                 to_goback = diaochan->isKongcheng() ? new DummyCard : diaochan->wholeHandCards();
@@ -162,7 +162,7 @@ public:
             if (!caoren->askForSkillInvoke(objectName()))
                 return false;
 
-            room->broadcastSkillInvoke(objectName());
+            caoren->broadcastSkillInvoke(objectName());
             int n = getWeaponCount(caoren);
             caoren->drawCards(n + 2, objectName());
             caoren->turnOver();
@@ -220,7 +220,6 @@ class Manjuan: public TriggerSkill {
 public:
     Manjuan(): TriggerSkill("manjuan") {
         events << BeforeCardsMove;
-        frequency = Frequent;
     }
 
     void doManjuan(ServerPlayer *sp_pangtong, int card_id) const{
@@ -661,7 +660,7 @@ public:
             ServerPlayer *target = player->tag["TanhuInvoke"].value<ServerPlayer *>();
 
             target->setFlags("-TanhuTarget");
-            room->removeFixedDistance(player, target, 1);
+            room->setFixedDistance(player, target, -1);
             player->tag.remove("TanhuInvoke");
         }
         return false;
@@ -1238,7 +1237,6 @@ class Fenyong: public TriggerSkill {
 public:
     Fenyong(): TriggerSkill("fenyong") {
         events << Damaged << DamageInflicted << EventPhaseStart;
-        frequency = Frequent;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -1367,19 +1365,19 @@ BGMPackage::BGMPackage(): Package("BGM") {
     bgm_caoren->addSkill(new Kuiwei);
     bgm_caoren->addSkill(new Yanzheng);
 
-    General *bgm_pangtong = new General(this, "bgm_pangtong", "qun", 3); // *SP 004
+    General *bgm_pangtong = new General(this, "bgm_pangtong", "qun", 3, true, true); // *SP 004
     bgm_pangtong->addSkill(new Manjuan);
     bgm_pangtong->addSkill(new Zuixiang);
     bgm_pangtong->addSkill(new ZuixiangClear);
     related_skills.insertMulti("zuixiang", "#zuixiang-clear");
 
-    General *bgm_zhangfei = new General(this, "bgm_zhangfei", "shu"); // *SP 005
+    General *bgm_zhangfei = new General(this, "bgm_zhangfei", "shu", 4, true, true); // *SP 005
     bgm_zhangfei->addSkill(new Jie);
     bgm_zhangfei->addSkill(new Dahe);
     bgm_zhangfei->addSkill(new DahePindian);
     related_skills.insertMulti("dahe", "#dahe");
 
-    General *bgm_lvmeng = new General(this, "bgm_lvmeng", "wu", 3); // *SP 006
+    General *bgm_lvmeng = new General(this, "bgm_lvmeng", "wu", 3, true, true); // *SP 006
     bgm_lvmeng->addSkill(new Tanhu);
     bgm_lvmeng->addSkill(new MouduanStart);
     bgm_lvmeng->addSkill(new Mouduan);
@@ -1387,7 +1385,7 @@ BGMPackage::BGMPackage(): Package("BGM") {
     related_skills.insertMulti("mouduan", "#mouduan-start");
     related_skills.insertMulti("mouduan", "#mouduan-clear");
 
-    General *bgm_liubei = new General(this, "bgm_liubei$", "shu"); // *SP 007
+    General *bgm_liubei = new General(this, "bgm_liubei$", "shu", 4, true, true); // *SP 007
     bgm_liubei->addSkill(new Zhaolie);
     bgm_liubei->addSkill(new ZhaolieAct);
     bgm_liubei->addSkill(new Shichou);
@@ -1395,17 +1393,17 @@ BGMPackage::BGMPackage(): Package("BGM") {
     related_skills.insertMulti("zhaolie", "#zhaolie");
     related_skills.insertMulti("shichou", "#shichou");
 
-    General *bgm_daqiao = new General(this, "bgm_daqiao", "wu", 3, false); // *SP 008
+    General *bgm_daqiao = new General(this, "bgm_daqiao", "wu", 3, false, true); // *SP 008
     bgm_daqiao->addSkill(new Yanxiao);
     bgm_daqiao->addSkill(new Anxian);
 
-    General *bgm_ganning = new General(this, "bgm_ganning", "qun"); // *SP 009
+    General *bgm_ganning = new General(this, "bgm_ganning", "qun", 4, true, true); // *SP 009
     bgm_ganning->addSkill(new Yinling);
     bgm_ganning->addSkill(new Junwei);
     bgm_ganning->addSkill(new JunweiGot);
     related_skills.insertMulti("junwei", "#junwei-got");
 
-    General *bgm_xiahoudun = new General(this, "bgm_xiahoudun", "wei"); // *SP 010
+    General *bgm_xiahoudun = new General(this, "bgm_xiahoudun", "wei", 4, true, true); // *SP 010
     bgm_xiahoudun->addSkill(new Fenyong);
     bgm_xiahoudun->addSkill(new FenyongDetach);
     bgm_xiahoudun->addSkill(new Xuehen);
@@ -1656,7 +1654,6 @@ class Shude: public TriggerSkill {
 public:
     Shude(): TriggerSkill("shude") {
         events << EventPhaseStart;
-        frequency = Frequent;
     }
 
     virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *wangyuanji, QVariant &) const{

@@ -218,7 +218,7 @@ private:
     ServerSocket *server;
     QSet<Room *> rooms;
     QHash<QString, ServerPlayer *> players;
-    QMultiHash<QString, ClientSocket *> addresses;
+    QStringList addresses;
     QMultiHash<QString, QString> name2objname;
 
     bool m_requestDeleteSelf;

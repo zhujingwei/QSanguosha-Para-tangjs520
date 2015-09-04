@@ -419,7 +419,6 @@ class KOFXiaoji: public TriggerSkill {
 public:
     KOFXiaoji(): TriggerSkill("kofxiaoji") {
         events << CardsMoveOneTime;
-        frequency = Frequent;
     }
 
     virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *sunshangxiang, QVariant &data) const{
@@ -459,7 +458,6 @@ class Yinli: public TriggerSkill {
 public:
     Yinli(): TriggerSkill("yinli") {
         events << BeforeCardsMove;
-        frequency = Frequent;
     }
 
     virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *sunshangxiang, QVariant &data) const{
@@ -762,7 +760,6 @@ public:
 class Botu: public PhaseChangeSkill {
 public:
     Botu(): PhaseChangeSkill("botu") {
-        frequency = Frequent;
     }
 
     virtual int getPriority(TriggerEvent) const{
@@ -785,7 +782,6 @@ class Wanrong: public TriggerSkill {
 public:
     Wanrong(): TriggerSkill("wanrong") {
         events << TargetConfirmed;
-        frequency = Frequent;
     }
 
     virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
@@ -876,7 +872,6 @@ class Liewei: public TriggerSkill {
 public:
     Liewei(): TriggerSkill("liewei") {
         events << Death;
-        frequency = Frequent;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{

@@ -48,7 +48,7 @@ public:
         else
             invoke = room->askForUseCard(zhugejin, "@@hongyuan", "@hongyuan");
         if (invoke) {
-            room->broadcastSkillInvoke(objectName());
+            zhugejin->broadcastSkillInvoke(objectName());
             zhugejin->setFlags("hongyuan");
             return n - 1;
         } else
@@ -131,7 +131,7 @@ public:
             }
         }
         if (card != NULL) {
-            room->broadcastSkillInvoke(objectName());
+            player->broadcastSkillInvoke(objectName());
             room->retrial(card, player, judge, objectName());
         }
 
@@ -143,7 +143,6 @@ class Mingzhe: public TriggerSkill {
 public:
     Mingzhe(): TriggerSkill("mingzhe") {
         events << BeforeCardsMove << CardsMoveOneTime << CardUsed << CardResponded;
-        frequency = Frequent;
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
@@ -173,7 +172,7 @@ public:
                     for (int i = 0; i < n; ++i) {
                         player->removeMark(objectName());
                         if (player->isAlive() && player->askForSkillInvoke(objectName(), data)) {
-                            room->broadcastSkillInvoke(objectName());
+                            player->broadcastSkillInvoke(objectName());
                             player->drawCards(1, objectName());
                         } else {
                             break;
@@ -197,7 +196,7 @@ public:
                 card = resp.m_card;
             }
             if (card && card->isRed() && player->askForSkillInvoke(objectName(), data)) {
-                room->broadcastSkillInvoke(objectName());
+                player->broadcastSkillInvoke(objectName());
                 player->drawCards(1, objectName());
             }
         }

@@ -150,38 +150,38 @@ QString General::getSkillDescription(bool includeMagatamas) const {
 }
 
 void General::lastWord() const{
-    QString basePath = "audio/death";
-    const QString fileNamePattern = "%1/%2.ogg";
-
-    QString generalName = objectName();
-    int generalSkinIndex = Config.value(QString("HeroSkin/%1").arg(generalName), 0).toInt();
+    QString filename = QString("audio/general/%1/death.ogg").arg(objectName());
+    int generalSkinIndex = Config.value(QString("HeroSkin/%1").arg(objectName()), 0).toInt();
     if (0 != generalSkinIndex) {
-        QString tmpPath = QString("image/heroskin/audio/%1_%2/death").arg(generalName).arg(generalSkinIndex);
-        QString tmpFile = fileNamePattern.arg(tmpPath).arg(generalName);
-        if (QFile::exists(tmpFile)) {
-            basePath = tmpPath;
-        }
-        else {
-            QString matchGeneralFullName = G_ROOM_SKIN.getMatchGeneralNameFromAudioConfig(
-                generalName, generalSkinIndex, getGenderString());
-            if (!matchGeneralFullName.isEmpty()) {
-                QString tmpPath = QString("image/heroskin/audio/%1/death").arg(matchGeneralFullName);
-                if (QDir(tmpPath).exists()) {
-                    basePath = tmpPath;
-                }
-            }
-        }
+        QString tmpFile = QString("image/heroskin/audio/%1_%2/death/%1.ogg").arg(objectName()).arg(generalSkinIndex);
+        if (QFile::exists(tmpFile))
+            filename = tmpFile;
     }
 
-    QString filename = fileNamePattern.arg(basePath).arg(generalName);
     bool fileExists = QFile::exists(filename);
-    if (!fileExists) {
-        QStringList origin_generals = objectName().split("_");
-        if (origin_generals.length() > 1)
-            filename = fileNamePattern.arg(basePath).arg(origin_generals.last());
-    }
+	if (!fileExists)
+		return;
 
     Sanguosha->playAudioEffect(filename);
+}
+
+bool General::hasRelatedSkill(const QString &skill_name) const
+{
+	return related_skills.contains(skill_name);
+}
+
+bool General::hasLastWord() const
+{
+	QString filename = QString("audio/general/%1/death.ogg").arg(objectName());
+    int generalSkinIndex = Config.value(QString("HeroSkin/%1").arg(objectName()), 0).toInt();
+    if (0 != generalSkinIndex) {
+        QString tmpFile = QString("image/heroskin/audio/%1_%2/death/%1.ogg").arg(objectName()).arg(generalSkinIndex);
+        if (QFile::exists(tmpFile))
+            filename = tmpFile;
+    }
+
+	bool fileExists = QFile::exists(filename);
+	return fileExists;
 }
 
 //增加珠联璧合系统

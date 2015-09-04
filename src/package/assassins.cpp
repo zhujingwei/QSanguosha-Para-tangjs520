@@ -21,16 +21,15 @@ public:
                 return false;
             foreach (ServerPlayer *p, use.to) {
                 if (player->askForSkillInvoke(objectName(), QVariant::fromValue(p))) {
+					player->broadcastSkillInvoke(objectName());
                     QString choice;
                     if (!player->canDiscard(p, "he"))
                         choice = "draw";
                     else
                         choice = room->askForChoice(player, objectName(), "draw+discard", QVariant::fromValue(p));
                     if (choice == "draw") {
-                        room->broadcastSkillInvoke(objectName(), 1);
                         player->drawCards(1, objectName());
                     } else {
-                        room->broadcastSkillInvoke(objectName(), 2);
                         room->setTag("MoukuiDiscard", data);
                         int disc = room->askForCardChosen(player, p, "he", objectName(), false, Card::MethodDiscard);
                         room->removeTag("MoukuiDiscard");
@@ -46,7 +45,6 @@ public:
             if (!effect.from->isAlive() || !effect.to->isAlive() || !effect.to->canDiscard(effect.from, "he"))
                 return false;
             int disc = room->askForCardChosen(effect.to, effect.from, "he", objectName(), false, Card::MethodDiscard);
-            room->broadcastSkillInvoke(objectName(), 3);
             room->throwCard(disc, effect.from, effect.to);
             room->removePlayerMark(effect.to, objectName() + effect.slash->toString());
         } else if (triggerEvent == CardFinished) {
@@ -70,7 +68,7 @@ public:
     virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         CardUseStruct use = data.value<CardUseStruct>();
         if (use.card->isKindOf("Slash") && room->askForSkillInvoke(player, objectName())) {
-            room->broadcastSkillInvoke(objectName(), 1);
+            player->broadcastSkillInvoke(objectName());
             room->askForDiscard(player, objectName(), 2, 2, false, true);
             player->drawCards(2, objectName());
 
@@ -90,10 +88,6 @@ public:
             }
             ServerPlayer *mosthp = maxs.first();
             if (room->askForSkillInvoke(mosthp, objectName())) {
-                int index = 2;
-                if (mosthp->isFemale())
-                    index = 3;
-                room->broadcastSkillInvoke(objectName(), index);
                 room->askForDiscard(mosthp, objectName(), 2, 2, false, true);
                 mosthp->drawCards(2, objectName());
             }
@@ -118,7 +112,7 @@ void MizhaoCard::onEffect(const CardEffectStruct &effect) const{
     if (effect.to->isKongcheng()) return;
 
     Room *room = effect.from->getRoom();
-    room->broadcastSkillInvoke("mizhao", effect.to->getGeneralName().contains("liubei") ? 2 : 1);
+    effect.from->broadcastSkillInvoke("mizhao");
 
     QList<ServerPlayer *> targets;
     foreach (ServerPlayer *p, room->getOtherPlayers(effect.to))
@@ -208,7 +202,7 @@ public:
             if (damage.to && damage.to->isAlive()
                 && damage.to->getHp() >= player->getHp() && damage.to != player && player->canDiscard(player, "h")
                 && room->askForCard(player, ".black", "@jieyuan-increase:" + damage.to->objectName(), data, objectName())) {
-                room->broadcastSkillInvoke(objectName(), 1);
+                player->broadcastSkillInvoke(objectName(), 1);
 
                 LogMessage log;
                 log.type = "#JieyuanIncrease";
@@ -223,7 +217,7 @@ public:
             if (damage.from && damage.from->isAlive()
                 && damage.from->getHp() >= player->getHp() && damage.from != player && player->canDiscard(player, "h")
                 && room->askForCard(player, ".red", "@jieyuan-decrease:" + damage.from->objectName(), data, objectName())) {
-                room->broadcastSkillInvoke(objectName(), 2);
+                player->broadcastSkillInvoke(objectName(), 2);
 
                 LogMessage log;
                 log.type = "#JieyuanDecrease";
@@ -269,7 +263,7 @@ public:
         bool invoke = room->askForSkillInvoke(killer, objectName(), QVariant::fromValue(player));
         player->setFlags("-FenxinTarget");
         if (invoke) {
-            room->broadcastSkillInvoke(objectName());
+            killer->broadcastSkillInvoke(objectName());
             room->doLightbox("$FenxinAnimate");
             room->removePlayerMark(killer, "@burnheart");
             QString role1 = killer->getRole();

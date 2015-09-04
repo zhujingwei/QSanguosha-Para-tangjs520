@@ -1,19 +1,17 @@
-function sgs.ai_skill_invoke.ziliang(self, data)
-	self.ziliang_id = nil
-	local damage = data:toDamage()
-	if hasManjuanEffect(damage.to) then return false end
+sgs.ai_skill_use["@@ziliang"] = function(self, data)
+	local damage = self.room:getTag("CurrentDamageStruct"):toDamage()
+	if hasManjuanEffect(damage.to) then return "." end
 	if not self:isFriend(damage.to) then
 		if damage.to:getPhase() == sgs.Player_NotActive and self:needKongcheng(damage.to, true) then
 			local ids = sgs.QList2Table(self.player:getPile("field"))
 			for _, id in ipairs(ids) do
 				local card = sgs.Sanguosha:getCard(id)
 				if card:isKindOf("Disaster") or card:isKindOf("GodSalvation") or card:isKindOf("AmazingGrace") or card:isKindOf("FireAttack") then
-					self.ziliang_id = id
-					return true
+					return "@ZiliangCard="..id
 				end
 			end
 		else
-			return false
+			return "."
 		end
 	else
 		if not (damage.to:getPhase() == sgs.Player_NotActive and self:needKongcheng(damage.to, true)) then
@@ -21,31 +19,23 @@ function sgs.ai_skill_invoke.ziliang(self, data)
 			local cards = {}
 			for _, id in ipairs(ids) do table.insert(cards, sgs.Sanguosha:getCard(id)) end
 			for _, card in ipairs(cards) do
-				if card:isKindOf("Peach") then self.ziliang_id = card:getEffectiveId() return true end
+				if card:isKindOf("Peach") then return "@ZiliangCard="..card:getEffectiveId() end
 			end
 			for _, card in ipairs(cards) do
-				if card:isKindOf("Jink") then self.ziliang_id = card:getEffectiveId() return true end
+				if card:isKindOf("Jink") then return "@ZiliangCard="..card:getEffectiveId() end
 			end
 			self:sortByKeepValue(cards, true)
-			self.ziliang_id = cards[1]:getEffectiveId()
-			return true
+			return "@ZiliangCard="..cards[1]:getEffectiveId()
 		else
-			return false
+			return "."
 		end
 	end
 end
 
-sgs.ai_skill_askforag.ziliang = function(self, card_ids)
-	return self.ziliang_id
-end
-
-sgs.ai_choicemade_filter.skillInvoke.ziliang = function(self, player, promptlist)
-	local damage = self.room:getTag("CurrentDamageStruct"):toDamage()
-	if damage.to and promptlist[#promptlist] == "yes" then
+sgs.ai_card_intention.ZiliangCard = function(self, card, from, to)
 		local intention = -40
-		if damage.to:getPhase() == sgs.Player_NotActive and self:needKongcheng(damage.to, true) then intention = 10 end
-		sgs.updateIntention(player, damage.to, intention)
-	end
+		if to:getPhase() == sgs.Player_NotActive and self:needKongcheng(to, true) then intention = 10 end
+		sgs.updateIntention(from, to, intention)
 end
 
 local function huyuan_validate(self, equip_type, is_handcard)
@@ -53,7 +43,7 @@ local function huyuan_validate(self, equip_type, is_handcard)
 	if is_handcard then targets = self.friends else targets = self.friends_noself end
 	if equip_type == "SilverLion" then
 		for _, enemy in ipairs(self.enemies) do
-			if enemy:hasSkills("yizhong|bazhen|bossmanjia") then table.insert(targets, enemy) end
+			if enemy:hasSkills("yizhong|bazhen") then table.insert(targets, enemy) end
 		end
 	end
 	for _, friend in ipairs(targets) do
@@ -64,7 +54,7 @@ local function huyuan_validate(self, equip_type, is_handcard)
 				break
 			end
 		end
-		if not has_equip and not ((equip_type == "Armor" or equip_type == "SilverLion") and friend:hasSkills("yizhong|bazhen|bossmanjia")) then
+		if not has_equip and not ((equip_type == "Armor" or equip_type == "SilverLion") and friend:hasSkills("yizhong|bazhen")) then
 			self:sort(self.enemies, "defense")
 			for _, enemy in ipairs(self.enemies) do
 				if friend:distanceTo(enemy) == 1 and self.player:canDiscard(enemy, "he") then
@@ -81,7 +71,7 @@ sgs.ai_skill_use["@@huyuan"] = function(self, prompt)
 	local cards = self.player:getHandcards()
 	cards = sgs.QList2Table(cards)
 	self:sortByKeepValue(cards)
-	if self.player:hasArmorEffect("silver_lion") then
+	if self.player:hasArmorEffect("SilverLion") then
 		local player = huyuan_validate(self, "SilverLion", false)
 		if player then return "@HuyuanCard=" .. self.player:getArmor():getEffectiveId() .. "->" .. player:objectName() end
 	end
@@ -139,7 +129,7 @@ sgs.ai_skill_playerchosen.huyuan = function(self, targets)
 end
 
 sgs.ai_card_intention.HuyuanCard = function(self, card, from, to)
-	if to[1]:hasSkills("bazhen|yizhong|bossmanjia") then
+	if to[1]:hasSkills("bazhen|yizhong") then
 		if sgs.Sanguosha:getCard(card:getEffectiveId()):isKindOf("SilverLion") then
 			sgs.updateIntention(from, to[1], 10)
 			return
@@ -255,13 +245,6 @@ sgs.ai_skill_invoke.niaoxiang = function(self, data)
 	return true
 end
 
-sgs.ai_choicemade_filter.skillInvoke.niaoxiang = function(self, player, promptlist)
-	if promptlist[#promptlist] == "yes" then
-		local target = findPlayerByObjectName(self.room, promptlist[#promptlist - 1])
-		if target then sgs.updateIntention(player, target, 50) end
-	end
-end
-
 sgs.ai_skill_invoke.yicheng = function(self, data)
 	local player = data:toPlayer()
 	if hasManjuanEffect(player) then
@@ -342,52 +325,4 @@ sgs.ai_skill_choice.qianhuan = function(self, choices, data)
 	if use.from and use.from:objectName() == self.player:objectName() then return "reject" end
 	if use.from and use.card:isKindOf("Slash") and self:isPriorFriendOfSlash(self.player, use.card, use.from) then return "reject" end
 	return "accept"
-end
-
-local function will_discard_zhendu(self)
-	local current = self.room:getCurrent()
-	local need_damage = self:getDamagedEffects(current, self.player) or self:needToLoseHp(current, self.player)
-	local analeptic = sgs.cloneCard("analeptic")
-	if self:isFriend(current) then
-		if (current:getMark("drank") > 0 or getCardsNum("Analeptic", current, self.player) >= 1 or current:isLocked(analeptic))
-			and not need_damage then
-			return -1
-		end
-		if (getKnownCard(current, self.player, "Slash") > 0 or (getCardsNum("Slash", current, self.player) >= 1 and current:getHandcardNum() >= 2))
-			and (not self:damageIsEffective(current, nil, self.player) or current:getHp() > 2 or (getCardsNum("Peach", current, self.player) > 1 and not self:isWeak(current))) then
-			local slash = sgs.cloneCard("slash")
-			local trend = 3
-			if current:hasWeapon("axe") then trend = trend - 1
-			elseif current:hasSkills("liegong|kofliegong|tieji|nostieji|wushuang|niaoxiang") then trend = trend - 0.4 end
-			for _, enemy in ipairs(self.enemies) do
-				if current:canSlash(enemy) and not self:slashProhibit(slash, enemy, current)
-					and self:slashIsEffective(slash, enemy, current) and sgs.isGoodTarget(enemy, self.enemies, self, true) then
-					return trend
-				end
-			end
-		end
-		if need_damage then return 3.3 end
-	elseif self:isEnemy(current) then
-		if need_damage then return -1 end
-		if (getKnownCard(current, self.player, "Analeptic") > 0 and not self:isWeak(current))
-			or current:getMark("drank") > 0 or current:isLocked(analeptic) then
-			return 2.5
-		end
-		if current:getHandcardNum() >= 2 then return -1 end
-		if getKnownCard(current, self.player, "Slash") == 0 and getCardsNum("Slash", current, self.player) < 0.5 then return 3.5 end
-	end
-	return -1
-end
-
-sgs.ai_skill_cardask["@zhendu-discard"] = function(self, data)
-	local discard_trend = will_discard_zhendu(self)
-	if discard_trend <= 0 then return "." end
-	if self.player:getHandcardNum() + math.random(1, 100) / 100 >= discard_trend then
-		local cards = sgs.QList2Table(self.player:getHandcards())
-		self:sortByKeepValue(cards)
-		for _, card in ipairs(cards) do
-			if not self:isValuableCard(card, self.player) then return "$" .. card:getEffectiveId() end
-		end
-	end
-	return "."
 end

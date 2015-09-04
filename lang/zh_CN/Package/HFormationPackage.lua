@@ -8,6 +8,8 @@ return {
 	["illustrator:heg_dengai"] = "Amo",
 	["ziliang"] = "资粮",
 	[":ziliang"] = "每当一名角色受到伤害后，你可以将一张“田”交给该角色。",
+	["@ziliang"] = "你可以发动“资粮”，将一张“田”交给受到伤害的角色",
+	["~ziliang"] = "选择一张\"田\"→点击确定",
 
 	["#heg_caohong"] = "魏之福将",
 	["heg_caohong"] = "曹洪-国",
@@ -44,7 +46,7 @@ return {
 	["jiangqin"] = "蒋钦",
 	["illustrator:jiangqin"] = "天空之城",
 	["shangyi"] = "尚义",
-	[":shangyi"] = "阶段技。你可以令一名其他角色观看你的手牌，然后你选择一项：1.观看其手牌，然后你可以弃置其中一张黑色牌。2.观看其身份牌。",
+	[":shangyi"] = "<font color=\"green\"><b>出牌阶段限一次</b></font>，你可以令一名其他角色观看你的手牌，然后你选择一项：1.观看其手牌，然后你可以弃置其中一张黑色牌。2.观看其身份牌。",
 	["shangyi:handcards"] = "手牌",
 	["shangyi:role"] = "身份牌",
 	["shangyi:remainedgenerals"] = "备选武将",
@@ -73,7 +75,7 @@ return {
 	["sorcery"] = "千幻",
 
 	["#hetaihou"] = "弄权之蛇蝎",
-	["hetaihou"] = "何太后",
+	["hetaihou"] = "何太后-国",
 	["illustrator:hetaihou"] = "KayaK, 木美人",
 	["zhendu"] = "鸩毒",
 	[":zhendu"] = "每当一名其他角色的出牌阶段开始时，你可以弃置一张手牌：若如此做，视为该角色使用一张【酒】（计入次数限制），然后你对该角色造成1点伤害。",

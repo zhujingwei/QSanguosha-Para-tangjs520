@@ -76,11 +76,17 @@ Engine::Engine()
     if (!DoLuaScript(lua, "lua/config.lua")) exit(1);
 
     QStringList stringlist_sp_convert = GetConfigFromLuaState(lua, "convert_pairs").toStringList();
-    foreach (const QString &cv_pair, stringlist_sp_convert) {
-        QStringList pairs = cv_pair.split("->");
-        QStringList cv_to = pairs.at(1).split("|");
-        foreach (const QString &to, cv_to)
-            sp_convert_pairs.insertMulti(pairs.at(0), to);
+	foreach(QString cv_pair, stringlist_sp_convert) {
+		QStringList pairs = cv_pair.split("|");
+		QStringList limited_generals = Config.value("Banlist/Roles", "").toStringList();
+		foreach(QString from, pairs){
+			if (limited_generals.contains(from)) continue;
+			foreach(QString to, pairs){
+				if (limited_generals.contains(to)) continue;
+				if (from != to)
+					sp_convert_pairs.insertMulti(from, to);
+			}
+		}
     }
 
     extra_hidden_generals = GetConfigFromLuaState(lua, "extra_hidden_generals").toStringList();
@@ -299,12 +305,6 @@ void Engine::addPackage(Package *package) {
                 }
             }
         }
-        if (sp_convert_pairs.keys().contains(general->objectName())) {
-            QStringList to_list(sp_convert_pairs.values(general->objectName()));
-            const Skill *skill = new SPConvertSkill(general->objectName(), to_list.join("+"));
-            addSkills(QList<const Skill *>() << skill);
-            general->addSkill(skill->objectName());
-        }
         generals.insert(general->objectName(), general);
         if (isGeneralHidden(general->objectName())) continue;
         if ((general->isLord() && !removed_default_lords.contains(general->objectName()))
@@ -509,11 +509,11 @@ CardUseStruct::CardUseReason Engine::getCurrentCardUseReason() {
 }
 
 QString Engine::findConvertFrom(const QString &general_name) const{
-    QStringList spConvertPairKeys = sp_convert_pairs.keys();
-    foreach (const QString &general, spConvertPairKeys) {
-        if (sp_convert_pairs.values(general).contains(general_name))
-            return general;
-    }
+//     QStringList spConvertPairKeys = sp_convert_pairs.keys();
+//     foreach (const QString &general, spConvertPairKeys) {
+//         if (sp_convert_pairs.values(general).contains(general_name))
+//             return general;
+//     }
     return QString();
 }
 
@@ -954,10 +954,14 @@ QStringList Engine::getRandomLords() const{
         banlist_ban.append(Config.value("Banlist/Roles").toStringList());
 
     QStringList lords;
+    QStringList showed_generals;
     QStringList alords = getLords();
     foreach (const QString &alord, alords) {
+        if (showed_generals.contains(alord)) continue;
         if (banlist_ban.contains(alord)) continue;
         lords << alord;
+        showed_generals << alord;
+        showed_generals << Sanguosha->getSpConvertPairs(alord);
     }
 
     int lord_num = Config.value("LordMaxChoice", -1).toInt();
@@ -1049,6 +1053,24 @@ QStringList Engine::getRandomGenerals(int count, const QSet<QString> &ban_set/* 
     qShuffle(all_generals);
 
     QStringList general_list = all_generals.mid(0, count);
+
+    QStringList showed_generals;
+
+    foreach (QString general_name, general_list) {
+        if (showed_generals.contains(general_name))
+            general_list.removeOne(general_name);
+        else {
+            showed_generals << general_name;
+            if (Config.value("EnableSPConvert", true).toBool()) {
+                QStringList sp_generals = sp_convert_pairs.values(general_name);
+                foreach (QString sp_general, sp_generals) {
+                    if (getBanPackages().contains(getGeneral(sp_general)->getPackage()) || getGeneral(sp_general)->isHidden())
+                        sp_generals.removeOne(sp_general);
+                }
+                showed_generals << sp_generals;
+            }
+        }
+    }
 
     return general_list;
 }
@@ -1335,4 +1357,17 @@ void Engine::playHulaoPassBGM()
             Audio::playBackgroundMusic(hulaoPassBGMPath);
         }
     }
+}
+
+QStringList Engine::getSpConvertPairs(const QString &general_name) const
+{
+	if (!Config.value("EnableSPConvert", true).toBool()) {
+        return QStringList();
+	}
+	QStringList sp_generals = sp_convert_pairs.values(general_name);
+	foreach (QString sp_general, sp_generals) {
+		if (getBanPackages().contains(getGeneral(sp_general)->getPackage()) || getGeneral(sp_general)->isHidden())
+			sp_generals.removeOne(sp_general);
+	}
+	return sp_generals;
 }

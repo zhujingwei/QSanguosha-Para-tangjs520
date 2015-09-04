@@ -42,6 +42,7 @@ public:
     void addSkill(Skill *skill);
     void addSkill(const QString &skill_name);
     bool hasSkill(const QString &skill_name) const;
+	bool hasLastWord() const;
 
     QList<const Skill *> getSkillList() const;
     QList<const Skill *> getVisibleSkillList() const;
@@ -50,6 +51,7 @@ public:
 
     void addRelateSkill(const QString &skill_name) { related_skills << skill_name; }
     const QStringList &getRelatedSkillNames() const { return related_skills; }
+	bool hasRelatedSkill(const QString &skill_name) const;
 
     QString getPackage() const;
 

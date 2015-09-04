@@ -79,7 +79,6 @@ public:
 
     QString getPlayerName(const QString &str);
     const QString &getSkillNameToInvoke() const { return skill_to_invoke; }
-    QString getSkillNameToInvokeData() const { return skill_to_invoke_data; }
 
     QTextDocument *getLinesDoc() const { return lines_doc; }
     QTextDocument *getPromptDoc() const { return prompt_doc; }
@@ -126,7 +125,7 @@ public:
     void setKnownCards(const Json::Value &set_str);
     void viewGenerals(const Json::Value &str);
     void setFixedDistance(const Json::Value &set_str);
-    void setAttackRangePair(const Json::Value &set_arg);
+    void setAttackRangePair(const Json::Value &set_str);
     void updateStateItem(const Json::Value &state_str);
     void setAvailableCards(const Json::Value &pile);
     void setCardFlag(const Json::Value &pattern_str);
@@ -245,7 +244,6 @@ private:
     QTextDocument *lines_doc, *prompt_doc;
     int pile_num;
     QString skill_to_invoke;
-    QString skill_to_invoke_data;
     QList<int> available_cards;
 
     unsigned int _m_lastServerSerial;
@@ -320,6 +318,7 @@ signals:
     void move_cards_got(int moveId, QList<CardsMoveStruct> moves);
 
     void skill_attached(const QString &skill_name);
+    void skill_detached(const QString &skill_name);
     void skill_all_detached();
 
     void do_filter();

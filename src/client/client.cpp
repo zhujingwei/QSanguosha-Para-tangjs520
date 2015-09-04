@@ -936,26 +936,25 @@ QString Client::_processCardPattern(const QString &pattern)
 
 void Client::askForCardOrUseCard(const Json::Value &cardUsage)
 {
-    if (!cardUsage.isArray() || !cardUsage[0].isString() || !cardUsage[1].isString()) {
+    if (!cardUsage.isArray() || cardUsage.size() < 2 || !cardUsage[0].isString() || !cardUsage[1].isString())
         return;
-    }
-
-    QStringList texts = toQString(cardUsage[1]).split(":");
-    if (texts.isEmpty()) {
-        return;
-    }
-
-    setPromptList(texts);
-
     QString card_pattern = toQString(cardUsage[0]);
     _m_roomState.setCurrentCardUsePattern(card_pattern);
+    QString textsString = toQString(cardUsage[1]);
+    QStringList texts = textsString.split(":");
+    int index = -1;
+    if (cardUsage.size() >= 4 && cardUsage[3].isInt() && cardUsage[3].asInt() > 0)
+        index = cardUsage[3].asInt();
 
-    if (card_pattern.endsWith("!")) {
+    if (texts.isEmpty())
+        return;
+    else
+        setPromptList(texts);
+
+    if (card_pattern.endsWith("!"))
         m_isDiscardActionRefusable = false;
-    }
-    else {
+    else
         m_isDiscardActionRefusable = true;
-    }
 
     QString temp_pattern = _processCardPattern(card_pattern);
     QRegExp rx("^@@?(\\w+)(-card)?$");
@@ -963,11 +962,6 @@ void Client::askForCardOrUseCard(const Json::Value &cardUsage)
         QString skill_name = rx.capturedTexts().at(1);
         const Skill *skill = Sanguosha->getSkill(skill_name);
         if (skill) {
-            int index = -1;
-            if (cardUsage[3].isInt() && cardUsage[3].asInt() > 0) {
-                index = cardUsage[3].asInt();
-            }
-
             QString text = prompt_doc->toHtml();
             text.append(tr("<br/> <b>Notice</b>: %1<br/>").arg(skill->getNotice(index)));
             prompt_doc->setHtml(text);
@@ -976,7 +970,7 @@ void Client::askForCardOrUseCard(const Json::Value &cardUsage)
 
     Status status = Responding;
     m_respondingUseFixedTarget = NULL;
-    if (cardUsage[2].isInt()) {
+    if (cardUsage.size() >= 3 && cardUsage[2].isInt()) {
         Card::HandlingMethod method = (Card::HandlingMethod)(cardUsage[2].asInt());
         switch (method) {
         case Card::MethodDiscard:
@@ -1020,7 +1014,6 @@ void Client::askForSkillInvoke(const Json::Value &arg)
     }
 
     skill_to_invoke = skill_name;
-    skill_to_invoke_data = data;
 
     QString text;
     if (data.isEmpty()) {
@@ -1072,7 +1065,6 @@ void Client::askForSurrender(const Json::Value &initiator)
 void Client::askForLuckCard(const Json::Value &)
 {
     skill_to_invoke = "luck_card";
-    skill_to_invoke_data = QString();
     prompt_doc->setHtml(tr("Do you want to use the luck card?"));
     setStatus(AskForSkillInvoke);
 }
@@ -1430,6 +1422,20 @@ void Client::killPlayer(const Json::Value &player_arg)
     player->detachAllSkills();
 
     if (!Self->hasFlag("marshalling")) {
+        QString general_name = player->getGeneralName();
+        QString last_word = Sanguosha->translate(QString("~%1").arg(general_name));
+        if (last_word.startsWith("~")) {
+            QStringList origin_generals = general_name.split("_");
+            if (origin_generals.length() > 1)
+                last_word = Sanguosha->translate(("~") + origin_generals.at(1));
+        }
+
+        if (last_word.startsWith("~") && general_name.endsWith("f")) {
+            QString origin_general = general_name;
+            origin_general.chop(1);
+            if (Sanguosha->getGeneral(origin_general))
+                last_word = Sanguosha->translate(("~") + origin_general);
+        }
         updatePileNum();
     }
 
@@ -1589,6 +1595,18 @@ void Client::setMark(const Json::Value &mark_str)
 
     ClientPlayer *player = getPlayer(who);
     player->setMark(mark, value);
+
+    if (mark.startsWith("ViewAsSkill_") && mark.endsWith("Effect") && player == Self && value == 0) {
+        QString skill_name = mark.mid(12);
+        skill_name.chop(6);
+
+        QString lost_mark = "ViewAsSkill_" + skill_name + "Lost";
+
+        if (!Self->hasSkill(skill_name, true) && Self->getMark(lost_mark) > 0) {
+            Self->setMark(lost_mark, 0);
+            emit skill_detached(skill_name);
+        }
+    }
 }
 
 void Client::onPlayerChooseSuit()
@@ -2089,7 +2107,7 @@ void Client::skillInvoked(const Json::Value &arg)
 
 void Client::animate(const Json::Value &animate_str)
 {
-    if (!animate_str.isArray() || !animate_str[0].isInt()
+    if (!animate_str.isArray() || animate_str.size() != 3 || !animate_str[0].isInt()
         || !animate_str[1].isString() ||  !animate_str[2].isString()) {
         return;
     }
@@ -2105,45 +2123,40 @@ void Client::setFixedDistance(const Json::Value &set_str)
     if (!set_str.isArray() || set_str.size() != 4) {
         return;
     }
-    if (!set_str[0].isString() || !set_str[1].isString()
-        || !set_str[2].isInt() || !set_str[3].isBool()) {
+    if (!set_str[0].isString() || !set_str[1].isString() || !set_str[2].isInt() || !set_str[3].isBool()) {
         return;
     }
 
     ClientPlayer *from = getPlayer(toQString(set_str[0]));
     ClientPlayer *to = getPlayer(toQString(set_str[1]));
+    int distance = set_str[2].asInt();
+    bool isSet = set_str[3].asBool();
+
     if (from && to) {
-        bool isSet = set_str[3].asBool();
-        int distance = set_str[2].asInt();
-        if (isSet) {
+        if (isSet)
             from->setFixedDistance(to, distance);
-        }
-        else {
+        else
             from->removeFixedDistance(to, distance);
-        }
     }
 }
 
-void Client::setAttackRangePair(const Json::Value &set_arg)
+void Client::setAttackRangePair(const Json::Value &set_str)
 {
-    if (!set_arg.isArray() || set_arg.size() != 3) {
+    if (!set_str.isArray())
         return;
-    }
-    if (!set_arg[0].isString() || !set_arg[1].isString()
-        || !set_arg[2].isBool()) {
+    if (!set_str[0].isString() || !set_str[1].isString() || !set_str[2].isBool())
         return;
-    }
 
-    ClientPlayer *from = getPlayer(toQString(set_arg[0]));
-    ClientPlayer *to = getPlayer(toQString(set_arg[1]));
+
+    ClientPlayer *from = getPlayer(toQString(set_str[0]));
+    ClientPlayer *to = getPlayer(toQString(set_str[1]));
+    bool isSet = set_str[2].asBool();
+
     if (from && to) {
-        bool isSet = set_arg[2].asBool();
-        if (isSet) {
+        if (isSet)
             from->insertAttackRangePair(to);
-        }
-        else {
+        else
             from->removeAttackRangePair(to);
-        }
     }
 }
 

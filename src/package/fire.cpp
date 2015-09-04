@@ -17,12 +17,10 @@ bool QuhuCard::targetFilter(const QList<const Player *> &targets, const Player *
 void QuhuCard::use(Room *room, ServerPlayer *xunyu, QList<ServerPlayer *> &targets) const{
     ServerPlayer *tiger = targets.first();
 
-    room->broadcastSkillInvoke("quhu", 1);
+    xunyu->broadcastSkillInvoke("quhu");
 
     bool success = xunyu->pindian(tiger, "quhu", NULL);
     if (success) {
-        room->broadcastSkillInvoke("quhu", 2);
-
         QList<ServerPlayer *> players = room->getOtherPlayers(tiger), wolves;
         foreach (ServerPlayer *player, players) {
             if (tiger->inMyAttackRange(player))
@@ -61,7 +59,7 @@ public:
             int x = upper - to->getHandcardNum();
             if (x <= 0) continue;
 
-            room->broadcastSkillInvoke(objectName());
+            xunyu->broadcastSkillInvoke(objectName());
             to->drawCards(x, objectName());
             if (!xunyu->isAlive())
                 break;
@@ -181,7 +179,7 @@ public:
             if (NULL != player && Player::Discard == player->getPhase()
                 && player->getHandcardNum() > player->getHp()) {
                 Room *room = player->getRoom();
-                room->broadcastSkillInvoke("xueyi");
+                player->broadcastSkillInvoke("xueyi");
                 room->notifySkillInvoked(player, "xueyi");
             }
         }
@@ -239,16 +237,16 @@ public:
                 if (shuangxiong->askForSkillInvoke(objectName())) {
                     room->setPlayerFlag(shuangxiong, "shuangxiong");
 
-                    room->broadcastSkillInvoke("shuangxiong", 1);
+                    shuangxiong->broadcastSkillInvoke("shuangxiong");
                     JudgeStruct judge;
                     judge.good = true;
                     judge.play_animation = false;
                     judge.reason = objectName();
-                    judge.pattern = ".";
                     judge.who = shuangxiong;
 
                     room->judge(judge);
-                    room->setPlayerMark(shuangxiong, "shuangxiong", judge.pattern == "red" ? 1 : 2);
+                    room->setPlayerMark(shuangxiong, "shuangxiong", judge.card->isRed() ? 1 : 2);
+                    room->setPlayerMark(shuangxiong, "ViewAsSkill_shuangxiongEffect", 1);
 
                     return true;
                 }
@@ -256,15 +254,13 @@ public:
         } else if (triggerEvent == FinishJudge) {
             JudgeStruct *judge = data.value<JudgeStruct *>();
             if (judge->reason == "shuangxiong") {
-                judge->pattern = (judge->card->isRed() ? "red" : "black");
-                if (room->getCardPlace(judge->card->getEffectiveId()) == Player::PlaceJudge) {
+                if (room->getCardPlace(judge->card->getEffectiveId()) == Player::PlaceJudge)
                     shuangxiong->obtainCard(judge->card);
-                }
             }
         } else if (triggerEvent == EventPhaseChanging) {
             PhaseChangeStruct change = data.value<PhaseChangeStruct>();
-            if (change.to == Player::NotActive && shuangxiong->hasFlag("shuangxiong"))
-                room->setPlayerFlag(shuangxiong, "-shuangxiong");
+            if (change.to == Player::NotActive && shuangxiong->getMark("ViewAsSkill_shuangxiongEffect") > 0)
+                room->setPlayerMark(shuangxiong, "ViewAsSkill_shuangxiongEffect", 0);
         }
 
         return false;
@@ -281,7 +277,7 @@ public:
         SlashEffectStruct effect = data.value<SlashEffectStruct>();
         if (effect.to->isAlive() && pangde->canDiscard(effect.to, "he")) {
             if (pangde->askForSkillInvoke(objectName(), data)) {
-                room->broadcastSkillInvoke(objectName());
+                pangde->broadcastSkillInvoke(objectName());
                 int to_throw = room->askForCardChosen(pangde, effect.to, "he", objectName(), false, Card::MethodDiscard);
                 room->throwCard(Sanguosha->getCard(to_throw), effect.to, pangde);
             }
@@ -324,7 +320,7 @@ public:
             return false;
 
         if (pangtong->askForSkillInvoke(objectName(), data)) {
-            room->broadcastSkillInvoke(objectName());
+            pangtong->broadcastSkillInvoke(objectName());
             room->doLightbox("$NiepanAnimate");
 
             room->removePlayerMark(pangtong, "@nirvana");
@@ -383,20 +379,21 @@ public:
             return false;
 
         if (wolong->askForSkillInvoke(objectName())) {
+			wolong->broadcastSkillInvoke(objectName());
             //与OL保持一致，在判定结果出来前显示动画
             room->setEmotion(wolong, "armor/eight_diagram");
 
             JudgeStruct judge;
             judge.pattern = ".|red";
             judge.good = true;
-            judge.reason = objectName();
+            judge.reason = "eight_diagram";
             judge.who = wolong;
 
             room->judge(judge);
 
             if (judge.isGood()) {
                 Jink *jink = new Jink(Card::NoSuit, 0);
-                jink->setSkillName(objectName());
+                jink->setSkillName("eight_diagram");
                 room->provide(jink);
                 return true;
             }
@@ -408,8 +405,7 @@ public:
     }
 };
 
-class Kanpo: public OneCardViewAsSkill
-{
+class Kanpo: public OneCardViewAsSkill {
 public:
     Kanpo(): OneCardViewAsSkill("kanpo") {
         filter_pattern = ".|black|.|hand";
@@ -417,32 +413,17 @@ public:
         response_or_use = true;
     }
 
-    virtual const Card *viewAs(const Card *originalCard) const {
+    virtual const Card *viewAs(const Card *originalCard) const{
         Card *ncard = new Nullification(originalCard->getSuit(), originalCard->getNumber());
         ncard->addSubcard(originalCard);
         ncard->setSkillName(objectName());
         return ncard;
     }
 
-    virtual bool isEnabledAtNullification(const ServerPlayer *player) const {
-        if (!player->isKongcheng()) {
-            foreach (const Card *card, player->getHandcards()) {
-                if (card->isBlack()) {
-                    return true;
-                }
-            }
+    virtual bool isEnabledAtNullification(const ServerPlayer *player) const{
+        foreach (const Card *card, player->getHandcards()) {
+            if (card->isBlack()) return true;
         }
-
-        QList<int> pile = player->getPile("wooden_ox");
-        if (!pile.isEmpty()) {
-            foreach (int id, pile) {
-                const Card *card = Sanguosha->getCard(id);
-                if (card->isBlack()) {
-                    return true;
-                }
-            }
-        }
-
         return false;
     }
 };
@@ -519,9 +500,9 @@ FirePackage::FirePackage()
     pangtong->addSkill(new Niepan);
 
     General *wolong = new General(this, "wolong", "shu", 3); // SHU 011
+    wolong->addSkill(new Bazhen);
     wolong->addSkill(new Huoji);
     wolong->addSkill(new Kanpo);
-    wolong->addSkill(new Bazhen);
 
     General *taishici = new General(this, "taishici", "wu"); // WU 012
     taishici->addSkill(new Tianyi);

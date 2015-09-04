@@ -38,7 +38,7 @@ public:
     DingpinViewAsSkill(): OneCardViewAsSkill("dingpin") {
     }
 
-    virtual bool isEnabledAtPlay(const Player *player) const{
+    bool isEnabledAtPlay(const Player *player) const{
         if (!player->canDiscard(player, "h") || player->getMark("dingpin") == 0xE) return false;
         if (!player->hasFlag("dingpin") && player->isWounded()) return true;
         foreach (const Player *p, player->getAliveSiblings()) {
@@ -47,11 +47,11 @@ public:
         return false;
     }
 
-    virtual bool viewFilter(const Card *to_select) const{
+    bool viewFilter(const Card *to_select) const{
         return !to_select->isEquipped() && (Self->getMark("dingpin") & (1 << int(to_select->getTypeId()))) == 0;
     }
 
-    virtual const Card *viewAs(const Card *originalCard) const{
+    const Card *viewAs(const Card *originalCard) const{
         DingpinCard *card = new DingpinCard;
         card->addSubcard(originalCard);
         return card;
@@ -66,10 +66,10 @@ public:
         global = true;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         if (triggerEvent == EventPhaseChanging) {
             PhaseChangeStruct change = data.value<PhaseChangeStruct>();
-            if (change.from == Player::Play) {
+            if (change.to == Player::NotActive) {
                 foreach (ServerPlayer *p, room->getAllPlayers()) {
                     if (p->hasFlag("dingpin"))
                         room->setPlayerFlag(p, "-dingpin");
@@ -120,17 +120,17 @@ public:
         events << TurnedOver << ChainStateChanged;
     }
 
-    virtual bool triggerable(const ServerPlayer *target) const{
+    bool triggerable(const ServerPlayer *target) const{
         return target != NULL;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &) const{
+    bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &) const{
         if (triggerEvent == ChainStateChanged && !player->isChained()) return false;
         foreach (ServerPlayer *p, room->getAllPlayers()) {
             if (!player->isAlive()) return false;
             if (TriggerSkill::triggerable(p)
                 && room->askForSkillInvoke(p, objectName(), QVariant::fromValue(player))) {
-                room->broadcastSkillInvoke(objectName());
+                p->broadcastSkillInvoke(objectName());
                 player->drawCards(1, objectName());
             }
         }
@@ -138,68 +138,99 @@ public:
     }
 };
 
-class Sidi: public TriggerSkill {
+SidiCard::SidiCard()
+{
+	target_fixed = true;
+	will_throw = false;
+	handling_method = Card::MethodNone;
+}
+
+void SidiCard::use(Room *room, ServerPlayer *, QList<ServerPlayer *> &) const
+{
+	room->throwCard(this, NULL);
+}
+
+class SidiVS : public OneCardViewAsSkill
+{
 public:
-    Sidi(): TriggerSkill("sidi") {
-        events << CardResponded << EventPhaseStart << EventPhaseChanging;
-        frequency = Frequent;
-    }
+	SidiVS() : OneCardViewAsSkill("sidi")
+	{
+		response_pattern = "@@sidi";
+		filter_pattern = ".|.|.|sidi";
+		expand_pile = "sidi";
+	}
 
-    virtual bool triggerable(const ServerPlayer *target) const{
-        return target != NULL;
-    }
-
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
-        if (triggerEvent == EventPhaseChanging) {
-            PhaseChangeStruct change = data.value<PhaseChangeStruct>();
-            if (change.from == Player::Play)
-                room->setPlayerMark(player, "sidi", 0);
-        } else if (triggerEvent == CardResponded) {
-            CardResponseStruct resp = data.value<CardResponseStruct>();
-            if (resp.m_isUse && resp.m_card->isKindOf("Jink")) {
-                foreach (ServerPlayer *p, room->getAllPlayers()) {
-                    if (TriggerSkill::triggerable(p) && (p == player || p->getPhase() != Player::NotActive)
-                        && room->askForSkillInvoke(p, objectName(), data)) {
-                        room->broadcastSkillInvoke(objectName());
-                        QList<int> ids = room->getNCards(1, false); // For UI
-                        CardsMoveStruct move(ids, p, Player::PlaceTable,
-                                             CardMoveReason(CardMoveReason::S_REASON_TURNOVER, p->objectName(), "sidi", QString()));
-                        room->moveCardsAtomic(move, true);
-                        p->addToPile("sidi", ids);
-                    }
-                }
-            }
-        } else if (triggerEvent == EventPhaseStart && player->getPhase() == Player::Play) {
-            foreach (ServerPlayer *p, room->getOtherPlayers(player)) {
-                if (player->getPhase() != Player::Play) return false;
-                if (TriggerSkill::triggerable(p) && p->getPile("sidi").length() > 0
-                    && room->askForSkillInvoke(p, "sidi_remove", "remove")) {
-                    LogMessage log;
-                    log.type = "#InvokeSkill";
-                    log.from = p;
-                    log.arg = "sidi";
-                    room->sendLog(log);
-
-                    room->fillAG(p->getPile("sidi"), p);
-                    int id = room->askForAG(p, p->getPile("sidi"), false, "sidi");
-                    room->clearAG(p);
-                    room->throwCard(id, NULL);
-                    room->addPlayerMark(player, "sidi");
-                }
-            }
-        }
-        return false;
-    }
+	const Card *viewAs(const Card *originalCard) const
+	{
+		SidiCard *sd = new SidiCard;
+		sd->addSubcard(originalCard);
+		return sd;
+	}
 };
 
-class SidiTargetMod: public TargetModSkill {
+class Sidi : public TriggerSkill
+{
 public:
-    SidiTargetMod(): TargetModSkill("#sidi-target") {
-    }
+	Sidi() : TriggerSkill("sidi")
+	{
+		events << CardResponded << EventPhaseStart << EventPhaseChanging;
+		//frequency = Frequent;
+		view_as_skill = new SidiVS;
+	}
 
-    virtual int getResidueNum(const Player *from, const Card *card) const{
-        return card->isKindOf("Slash") ? -from->getMark("sidi") : 0;
-    }
+	bool triggerable(const ServerPlayer *target) const
+	{
+		return target != NULL;
+	}
+
+	bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+	{
+		if (triggerEvent == EventPhaseChanging) {
+			PhaseChangeStruct change = data.value<PhaseChangeStruct>();
+			if (change.from == Player::Play)
+				room->setPlayerMark(player, "sidi", 0);
+		} else if (triggerEvent == CardResponded) {
+			CardResponseStruct resp = data.value<CardResponseStruct>();
+			if (resp.m_isUse && resp.m_card->isKindOf("Jink")) {
+				foreach (ServerPlayer *p, room->getAllPlayers()) {
+					if (TriggerSkill::triggerable(p) && (p == player || p->getPhase() != Player::NotActive)
+						&& room->askForSkillInvoke(p, objectName(), data)) {
+							p->broadcastSkillInvoke(objectName(), 1);
+							QList<int> ids = room->getNCards(1, false); // For UI
+							CardsMoveStruct move(ids, p, Player::PlaceTable,
+								CardMoveReason(CardMoveReason::S_REASON_TURNOVER, p->objectName(), "sidi", QString()));
+							room->moveCardsAtomic(move, true);
+							p->addToPile("sidi", ids);
+					}
+				}
+			}
+		} else if (triggerEvent == EventPhaseStart && player->getPhase() == Player::Play) {
+			foreach (ServerPlayer *p, room->getOtherPlayers(player)) {
+				if (player->getPhase() != Player::Play) return false;
+				if (TriggerSkill::triggerable(p) && p->getPile("sidi").length() > 0 && room->askForUseCard(p, "@@sidi", "sidi_remove:remove", -1, Card::MethodNone))
+					room->addPlayerMark(player, "sidi");
+			}
+		}
+		return false;
+	}
+
+	int getEffectIndex(const ServerPlayer *, const Card *) const
+	{
+		return 2;
+	}
+};
+
+class SidiTargetMod : public TargetModSkill
+{
+public:
+	SidiTargetMod() : TargetModSkill("#sidi-target")
+	{
+	}
+
+	int getResidueNum(const Player *from, const Card *card) const
+	{
+		return card->isKindOf("Slash") ? -from->getMark("sidi") : 0;
+	}
 };
 
 class ShenduanViewAsSkill: public OneCardViewAsSkill {
@@ -233,7 +264,7 @@ public:
         view_as_skill = new ShenduanViewAsSkill;
     }
 
-    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
         if (move.from != player)
             return false;
@@ -278,11 +309,11 @@ public:
         events << PreCardUsed;
     }
 
-    virtual bool triggerable(const ServerPlayer *target) const{
+    bool triggerable(const ServerPlayer *target) const{
         return target != NULL;
     }
 
-    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         CardUseStruct use = data.value<CardUseStruct>();
         if (use.card->isKindOf("SupplyShortage") && use.card->getSkillName() == "shenduan") {
             QList<int> ids = StringList2IntList(player->property("shenduan").toString().split("+"));
@@ -299,7 +330,7 @@ public:
         pattern = "SupplyShortage";
     }
 
-    virtual int getDistanceLimit(const Player *, const Card *card) const{
+    int getDistanceLimit(const Player *, const Card *card) const{
         if (card->getSkillName() == "shenduan")
             return 1000;
         else
@@ -312,18 +343,18 @@ public:
     Yonglve(): PhaseChangeSkill("yonglve") {
     }
 
-    virtual bool triggerable(const ServerPlayer *target) const{
+    bool triggerable(const ServerPlayer *target) const{
         return target != NULL;
     }
 
-    virtual bool onPhaseChange(ServerPlayer *target) const{
+    bool onPhaseChange(ServerPlayer *target) const{
         if (target->getPhase() != Player::Judge) return false;
         Room *room = target->getRoom();
         foreach (ServerPlayer *hs, room->getOtherPlayers(target)) {
             if (target->isDead() || target->getJudgingArea().isEmpty()) break;
             if (!TriggerSkill::triggerable(hs) || !hs->inMyAttackRange(target)) continue;
             if (room->askForSkillInvoke(hs, objectName())) {
-                room->broadcastSkillInvoke(objectName());
+                hs->broadcastSkillInvoke(objectName());
                 int id = room->askForCardChosen(hs, target, "j", objectName(), false, Card::MethodDiscard);
                 room->throwCard(id, NULL, hs);
                 if (hs->isAlive() && target->isAlive() && hs->canSlash(target, false)) {
@@ -344,11 +375,11 @@ public:
         events << PreDamageDone << CardFinished;
     }
 
-    virtual bool triggerable(const ServerPlayer *target) const{
+    bool triggerable(const ServerPlayer *target) const{
         return target != NULL;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         if (triggerEvent == PreDamageDone) {
             DamageStruct damage = data.value<DamageStruct>();
             if (damage.card && damage.card->isKindOf("Slash") && damage.card->getSkillName() == "yonglve")
@@ -372,11 +403,11 @@ public:
         frequency = Compulsory;
     }
 
-    virtual bool triggerable(const ServerPlayer *target) const{
+    bool triggerable(const ServerPlayer *target) const{
         return target != NULL;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         if (triggerEvent == EventPhaseChanging) {
             PhaseChangeStruct change = data.value<PhaseChangeStruct>();
             if (change.to == Player::NotActive) {
@@ -388,8 +419,11 @@ public:
             if (use.card->getTypeId() != Card::TypeSkill
                 && player->isAlive() && player->getPhase() != Player::NotActive) {
                 room->addPlayerMark(player, "benxi");
-                if (TriggerSkill::triggerable(player))
+                if (TriggerSkill::triggerable(player)) {
+					player->broadcastSkillInvoke(objectName());
+					room->notifySkillInvoked(player, objectName());
                     room->setPlayerMark(player, "@benxi", player->getMark("benxi"));
+				}
             }
         } else if (triggerEvent == EventAcquireSkill || triggerEvent == EventLoseSkill) {
             QString name = data.toString();
@@ -408,7 +442,7 @@ public:
     BenxiTargetMod(): TargetModSkill("#benxi-target") {
     }
 
-    virtual int getExtraTargetNum(const Player *from, const Card *card) const{
+    int getExtraTargetNum(const Player *from, const Card *card) const{
         if (from->hasSkill("benxi") && isAllAdjacent(from, card))
             return 1;
         else
@@ -434,7 +468,7 @@ public:
     BenxiDistance(): DistanceSkill("#benxi-dist") {
     }
 
-    virtual int getCorrect(const Player *from, const Player *) const{
+    int getCorrect(const Player *from, const Player *) const{
         if (from->hasSkill("benxi") && from->getPhase() != Player::NotActive)
             return -from->getMark("benxi");
         return 0;
@@ -447,11 +481,11 @@ public:
         events << EventPhaseStart << CardUsed << CardResponded;
     }
 
-    virtual bool triggerable(const ServerPlayer *target) const{
+    bool triggerable(const ServerPlayer *target) const{
         return target != NULL && target->getPhase() == Player::Play;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         if (triggerEvent == EventPhaseStart) {
             player->setMark(objectName(), 0);
             if (TriggerSkill::triggerable(player)) {
@@ -463,7 +497,7 @@ public:
                 if (targets.isEmpty()) return false;
                 ServerPlayer *target = room->askForPlayerChosen(player, targets, objectName(), "qiangzhi-invoke", true, true);
                 if (target) {
-                    room->broadcastSkillInvoke(objectName(), 1);
+                    player->broadcastSkillInvoke(objectName(), 1);
                     int id = room->askForCardChosen(player, target, "h", objectName());
                     room->showCard(target, id);
                     player->setMark(objectName(), int(Sanguosha->getCard(id)->getTypeId()));
@@ -487,7 +521,7 @@ public:
                     log.arg = objectName();
                     room->sendLog(log);
                 }
-                room->broadcastSkillInvoke(objectName(), 2);
+                player->broadcastSkillInvoke(objectName(), 2);
                 player->drawCards(1, objectName());
             }
         }
@@ -501,15 +535,16 @@ public:
         events << EventPhaseStart << EventPhaseChanging << Death;
     }
 
-    virtual bool triggerable(const ServerPlayer *target) const{
+    bool triggerable(const ServerPlayer *target) const{
         return target != NULL;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         if (triggerEvent == EventPhaseStart && player->getPhase() == Player::Play) {
             foreach (ServerPlayer *p, room->getOtherPlayers(player)) {
                 if (!player->isAlive()) return false;
                 if (TriggerSkill::triggerable(p) && room->askForSkillInvoke(p, objectName())) {
+					p->broadcastSkillInvoke(objectName());
                     p->setFlags("XiantuInvoked");
                     p->drawCards(2, objectName());
                     if (p->isAlive() && player->isAlive()) {
@@ -563,7 +598,7 @@ public:
         events << SlashMissed;
     }
 
-    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         SlashEffectStruct effect = data.value<SlashEffectStruct>();
 
         const Card *jink = effect.jink;
@@ -585,7 +620,7 @@ public:
                                                         "zhongyong-invoke:" + effect.to->objectName(), true, true);
         room->clearAG(player);
         if (!target) return false;
-        room->broadcastSkillInvoke(objectName());
+        player->broadcastSkillInvoke(objectName());
         DummyCard *dummy = new DummyCard(ids);
         room->obtainCard(target, dummy);
         delete dummy;
@@ -614,11 +649,11 @@ public:
     Shenxing(): ViewAsSkill("shenxing") {
     }
 
-    virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
+    bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
         return selected.length() < 2 && !Self->isJilei(to_select);
     }
 
-    virtual const Card *viewAs(const QList<const Card *> &cards) const{
+    const Card *viewAs(const QList<const Card *> &cards) const{
         if (cards.length() != 2)
             return NULL;
 
@@ -627,7 +662,7 @@ public:
         return card;
     }
 
-    virtual bool isEnabledAtPlay(const Player *player) const{
+    bool isEnabledAtPlay(const Player *player) const{
         return player->getCardCount(true) >= 2 && player->canDiscard(player, "he");
     }
 };
@@ -669,7 +704,7 @@ public:
         response_pattern = "@@bingyi";
     }
 
-    virtual const Card *viewAs() const{
+    const Card *viewAs() const{
         return new BingyiCard;
     }
 };
@@ -680,7 +715,7 @@ public:
         view_as_skill = new BingyiViewAsSkill;
     }
 
-    virtual bool onPhaseChange(ServerPlayer *target) const{
+    bool onPhaseChange(ServerPlayer *target) const{
         if (target->getPhase() != Player::Finish || target->isKongcheng()) return false;
         target->getRoom()->askForUseCard(target, "@@bingyi", "@bingyi-card");
         return false;
@@ -693,11 +728,11 @@ public:
         events << TargetSpecifying << CardFinished;
     }
 
-    virtual bool triggerable(const ServerPlayer *target) const{
+    bool triggerable(const ServerPlayer *target) const{
         return target != NULL;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         CardUseStruct use = data.value<CardUseStruct>();
         if (triggerEvent == CardFinished
             && (use.card->isKindOf("Slash") || (use.card->isNDTrick() && use.card->isBlack()))) {
@@ -720,7 +755,6 @@ public:
             ServerPlayer *target = room->askForPlayerChosen(player, targets, objectName(),
                                                             "zenhui-invoke:" + use.to.first()->objectName(), true, true);
             if (target) {
-                room->broadcastSkillInvoke(objectName());
                 player->setFlags(objectName());
 
                 // Collateral
@@ -742,12 +776,14 @@ public:
                     room->sendLog(log);
                 }
 
+				player->broadcastSkillInvoke(objectName());
+
                 bool extra_target = true;
                 if (!target->isNude()) {
                     const Card *card = room->askForCard(target, "..", "@zenhui-give:" + player->objectName(), data, Card::MethodNone);
                     if (card) {
                         extra_target = false;
-                        player->obtainCard(card, true, CardMoveReason::S_REASON_GIVE);
+                        player->obtainCard(card);
 
                         if (target->isAlive()) {
                             LogMessage log;
@@ -789,11 +825,11 @@ public:
         events << DamageInflicted;
     }
 
-    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
         if (damage.from && damage.from->isMale() && player->canDiscard(player, "he")) {
             if (room->askForCard(player, ".Equip", "@jiaojin", data, objectName())) {
-                room->broadcastSkillInvoke(objectName());
+                player->broadcastSkillInvoke(objectName());
 
                 LogMessage log;
                 log.type = "#Jiaojin";
@@ -816,7 +852,7 @@ public:
     Youdi(): PhaseChangeSkill("youdi") {
     }
 
-    virtual bool onPhaseChange(ServerPlayer *target) const{
+    bool onPhaseChange(ServerPlayer *target) const{
         if (target->getPhase() != Player::Finish || target->isNude()) return false;
         Room *room = target->getRoom();
         QList<ServerPlayer *> players;
@@ -826,6 +862,7 @@ public:
         if (players.isEmpty()) return false;
         ServerPlayer *player = room->askForPlayerChosen(target, players, objectName(), "youdi-invoke", true, true);
         if (player) {
+			target->broadcastSkillInvoke(objectName());
             int id = room->askForCardChosen(player, target, "he", objectName(), false, Card::MethodDiscard);
             room->throwCard(id, target, player);
             if (!Sanguosha->getCard(id)->isKindOf("Slash") && player->isAlive() && !player->isNude()) {
@@ -843,11 +880,11 @@ public:
         events << EventPhaseChanging;
     }
 
-    virtual bool triggerable(const ServerPlayer *target) const{
+    bool triggerable(const ServerPlayer *target) const{
         return target != NULL;
     }
 
-    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         PhaseChangeStruct change = data.value<PhaseChangeStruct>();
         if (change.to != Player::NotActive || player->getMark("qieting") > 0) return false;
         foreach (ServerPlayer *caifuren, room->getAllPlayers()) {
@@ -869,10 +906,10 @@ public:
                 room->sendLog(log);
                 room->notifySkillInvoked(caifuren, objectName());
                 if (choice == "draw") {
-                    room->broadcastSkillInvoke(objectName(), 2);
+                    caifuren->broadcastSkillInvoke(objectName(), 2);
                     caifuren->drawCards(1, objectName());
                 } else {
-                    room->broadcastSkillInvoke(objectName(), 1);
+                    caifuren->broadcastSkillInvoke(objectName(), 1);
                     int index = choice.toInt();
                     const Card *card = player->getEquip(index);
                     room->moveCardTo(card, caifuren, Player::PlaceEquip);
@@ -890,11 +927,11 @@ public:
         global = true;
     }
 
-    virtual int getPriority(TriggerEvent) const{
+    int getPriority(TriggerEvent) const{
         return 6;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *, ServerPlayer *player, QVariant &data) const{
+    bool trigger(TriggerEvent triggerEvent, Room *, ServerPlayer *player, QVariant &data) const{
         if (triggerEvent == PreCardUsed && player->isAlive() && player->getPhase() != Player::NotActive
             && player->getMark("qieting") == 0) {
             CardUseStruct use = data.value<CardUseStruct>();
@@ -987,15 +1024,15 @@ public:
         limit_mark = "@handover";
     }
 
-    virtual bool isEnabledAtPlay(const Player *player) const{
+    bool isEnabledAtPlay(const Player *player) const{
         return player->getMark("@handover") > 0 && player->getEquips().length() > 0;
     }
 
-    virtual bool isEnabledAtResponse(const Player *, const QString &pattern) const{
+    bool isEnabledAtResponse(const Player *, const QString &pattern) const{
         return pattern == "@xianzhou";
     }
 
-    virtual const Card *viewAs() const{
+    const Card *viewAs() const{
         QString pattern = Sanguosha->getCurrentCardUsePattern();
         if (pattern == "@xianzhou") {
             return new XianzhouDamageCard;
@@ -1009,11 +1046,10 @@ class Jianying: public TriggerSkill {
 public:
     Jianying(): TriggerSkill("jianying") {
         events << CardUsed << CardResponded << EventPhaseChanging;
-        frequency = Frequent;
         global = true;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         if ((triggerEvent == CardUsed || triggerEvent == CardResponded) && player->getPhase() == Player::Play) {
             const Card *card = NULL;
             if (triggerEvent == CardUsed)
@@ -1031,7 +1067,7 @@ public:
                 && ((suit > 0 && int(card->getSuit()) + 1 == suit)
                     || (number > 0 && card->getNumber() == number))
                 && room->askForSkillInvoke(player, objectName(), data)) {
-                room->broadcastSkillInvoke(objectName());
+                player->broadcastSkillInvoke(objectName());
                 room->drawCards(player, 1, objectName());
             }
         } else if (triggerEvent == EventPhaseChanging) {
@@ -1051,16 +1087,19 @@ public:
         frequency = Compulsory;
     }
 
-    virtual void onDamaged(ServerPlayer *player, const DamageStruct &) const{
+    void onDamaged(ServerPlayer *player, const DamageStruct &) const{
         Room *room = player->getRoom();
         if (player->getMark("shibei") > 0) {
-            room->broadcastSkillInvoke(objectName());
             room->sendCompulsoryTriggerLog(player, objectName());
 
-            if (player->getMark("shibei") == 1)
+            if (player->getMark("shibei") == 1) {
+				player->broadcastSkillInvoke(objectName(), 2);
                 room->recover(player, RecoverStruct(player));
-            else
+			}
+            else {
+				player->broadcastSkillInvoke(objectName(), 1);
                 room->loseHp(player);
+			}
         }
     }
 };
@@ -1073,7 +1112,7 @@ public:
         global = true;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         if (triggerEvent == EventPhaseChanging) {
             PhaseChangeStruct change = data.value<PhaseChangeStruct>();
             if (change.to == Player::NotActive) {

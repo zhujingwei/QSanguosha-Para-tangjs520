@@ -77,7 +77,6 @@ RoomScene::RoomScene(QMainWindow *mainWindow)
     _m_commonLayout = &(G_ROOM_SKIN.getCommonLayout());
 
     m_skillButtonSank = false;
-    m_ShefuAskState = ShefuAskNecessary;
 
     // create photos
     for (int i = 0; i < player_count - 1; ++i) {
@@ -203,6 +202,7 @@ RoomScene::RoomScene(QMainWindow *mainWindow)
     card_container->moveBy(-120, 0);
 
     connect(ClientInstance, SIGNAL(skill_attached(QString)), this, SLOT(attachSkill(QString)));
+    connect(ClientInstance, SIGNAL(skill_detached(QString)), this, SLOT(detachSkill(QString)));
     connect(ClientInstance, SIGNAL(skill_all_detached()), this, SLOT(detachAllSkills()));
 
     enemy_box = NULL;
@@ -265,13 +265,13 @@ RoomScene::RoomScene(QMainWindow *mainWindow)
     if (ServerInfo.DisableChat)
         chat_edit_widget->hide();
 
-    //单机游戏时默认隐藏与聊天相关的窗口
-    MainWindow *mainWnd = qobject_cast<MainWindow *>(main_window);
-    if (NULL != mainWnd && mainWnd->isConsoleStart()) {
-        chat_box_widget->hide();
-        chat_edit->hide();
-        chat_widget->hide();
-    }
+	//单机游戏时默认隐藏与聊天相关的窗口
+	MainWindow *mainWnd = qobject_cast<MainWindow *>(main_window);
+	if (NULL != mainWnd && mainWnd->isConsoleStart()) {
+		chat_box_widget->hide();
+		chat_edit->hide();
+		chat_widget->hide();
+	}
 
     // log box
     log_box = new ClientLogBox;
@@ -324,35 +324,34 @@ RoomScene::RoomScene(QMainWindow *mainWindow)
     m_pileCardNumInfoTextBox->setDefaultTextColor(Config.TextEditColor);
     updateRoles(roles);
 
-    add_robot = NULL;
-    fill_robots = NULL;
-    return_main_menu = NULL;
+	add_robot = NULL;
+	fill_robots = NULL;
+	return_main_menu = NULL;
 
-    //战局重放时无需创建“补全电脑”、“添加一个电脑”和“返回主菜单”按钮
-    if (!ClientInstance->isReplayState() && ServerInfo.EnableAI) {
-        control_panel = addRect(0, 0, 500, 150, Qt::NoPen);
-        control_panel->hide();
+	//战局重放时无需创建“补全电脑”、“添加一个电脑”和“返回主菜单”按钮
+	if (!ClientInstance->isReplayState() && ServerInfo.EnableAI) {
+		control_panel = addRect(0, 0, 500, 150, Qt::NoPen);
+		control_panel->hide();
 
-        add_robot = new Button(tr("Add a robot"));
-        add_robot->setParentItem(control_panel);
-        add_robot->setTransform(QTransform::fromTranslate(-add_robot->boundingRect().width() / 2, -add_robot->boundingRect().height() / 2), true);
-        add_robot->setPos(0, -add_robot->boundingRect().height() - 10);
+		add_robot = new Button(tr("Add a robot"));
+		add_robot->setParentItem(control_panel);
+		add_robot->setTransform(QTransform::fromTranslate(-add_robot->boundingRect().width() / 2, -add_robot->boundingRect().height() / 2));
+		add_robot->setPos(0, -add_robot->boundingRect().height() - 10);
 
-        fill_robots = new Button(tr("Fill robots"));
-        fill_robots->setParentItem(control_panel);
-        fill_robots->setToolTip(tr("Fill robots and start a new game"));
-        fill_robots->setTransform(QTransform::fromTranslate(-fill_robots->boundingRect().width() / 2, -fill_robots->boundingRect().height() / 2), true);
-        add_robot->setPos(0, add_robot->boundingRect().height() + 10);
-
+		fill_robots = new Button(tr("Fill robots"));
+		fill_robots->setParentItem(control_panel);
+		fill_robots->setToolTip(tr("Fill robots and start a new game"));
+		fill_robots->setTransform(QTransform::fromTranslate(-fill_robots->boundingRect().width() / 2, -fill_robots->boundingRect().height() / 2));
+		add_robot->setPos(0, add_robot->boundingRect().height() + 10);
         return_main_menu = new Button(tr("Return to main menu"));
         addItem(return_main_menu);
         connect(return_main_menu, SIGNAL(clicked()), this, SIGNAL(return_to_start()));
 
-        connect(add_robot, SIGNAL(clicked()), ClientInstance, SLOT(addRobot()));
-        connect(fill_robots, SIGNAL(clicked()), ClientInstance, SLOT(fillRobots()));
-        connect(Self, SIGNAL(owner_changed(bool)), this, SLOT(showOwnerButtons(bool)));
-    } else {
-        control_panel = NULL;
+		connect(add_robot, SIGNAL(clicked()), ClientInstance, SLOT(addRobot()));
+		connect(fill_robots, SIGNAL(clicked()), ClientInstance, SLOT(fillRobots()));
+		connect(Self, SIGNAL(owner_changed(bool)), this, SLOT(showOwnerButtons(bool)));
+	} else {
+		control_panel = NULL;
     }
     animations = new EffectAnimation(this);
 
@@ -512,10 +511,12 @@ void RoomScene::handleGameEvent(const Json::Value &arg) {
         }
     case S_GAME_EVENT_PREPARE_SKILL:
     case S_GAME_EVENT_UPDATE_SKILL: {
-            if (eventType == S_GAME_EVENT_PREPARE_SKILL) {
-                updateSkillButtons();
-            }
-            break;
+        foreach(Photo *photo, photos)
+            photo->updateAvatarTooltip();
+        dashboard->updateAvatarTooltip();
+        if (eventType == S_GAME_EVENT_PREPARE_SKILL)
+            updateSkillButtons(true);
+        break;
         }
     case S_GAME_EVENT_CHANGE_GENDER: {
             QString player_name = arg[1].asCString();
@@ -637,17 +638,20 @@ void RoomScene::handleGameEvent(const Json::Value &arg) {
     }
 
     case S_GAME_EVENT_REVEAL_PINDIAN: {
-            QString from_name = arg[1].asCString(), to_name = arg[3].asCString();
-            int from_id = arg[2].asInt(), to_id = arg[4].asInt();
-            bool success = arg[5].asBool();
-            pindian_success = success;
-            QString reason = arg[6].asCString();
+        QString from_name = arg[1].asCString(), to_name = arg[3].asCString();
+        int from_id = arg[2].asInt(), to_id = arg[4].asInt();
+        bool success = arg[5].asBool();
+        pindian_success = success;
+        QString reason = arg[6].asCString();
 
-            if (Config.value("EnablePindianBox", true).toBool())
-                showPindianBox(from_name, from_id, to_name, to_id, reason);
-            else
-                setEmotion(from_name, success ? "success" : "no-success");
-        }
+        if (Config.value("EnablePindianBox", true).toBool())
+            showPindianBox(from_name, from_id, to_name, to_id, reason);
+        else
+            setEmotion(from_name, success ? "success" : "no-success");
+    }
+    case S_GAME_EVENT_REFASHION_SKILL: {
+        refashionSkills();
+    }
     default:
             break;
     }
@@ -984,17 +988,17 @@ void RoomScene::updateTable() {
 
     m_tableCenterPos = m_tableRect.center();
 
-    if (control_panel && return_main_menu) {
-        control_panel->setPos(m_tableCenterPos);
-        QRectF fillRobotsBtnRect = fill_robots->sceneBoundingRect();
-        QPointF returnMainMenuBtnPos = QPointF(fillRobotsBtnRect.left(), fillRobotsBtnRect.bottom()
-            + fill_robots->boundingRect().height() + 20);
-        QRectF dashboardRect = dashboard->sceneBoundingRect();
-        int diff = (returnMainMenuBtnPos.y() + return_main_menu->boundingRect().height() + 15) - dashboardRect.top();
-        if (diff > 0) {
-            control_panel->moveBy(0, -diff);
-            returnMainMenuBtnPos += QPointF(0, -diff);
-        }
+	if (control_panel && return_main_menu) {
+		control_panel->setPos(m_tableCenterPos);
+		QRectF fillRobotsBtnRect = fill_robots->sceneBoundingRect();
+		QPointF returnMainMenuBtnPos = QPointF(fillRobotsBtnRect.left(), fillRobotsBtnRect.bottom()
+			+ fill_robots->boundingRect().height() + 20);
+		QRectF dashboardRect = dashboard->sceneBoundingRect();
+		int diff = (returnMainMenuBtnPos.y() + return_main_menu->boundingRect().height() + 15) - dashboardRect.top();
+		if (diff > 0) {
+			control_panel->moveBy(0, -diff);
+			returnMainMenuBtnPos += QPointF(0, -diff);
+		}
         return_main_menu->setPos(returnMainMenuBtnPos);
     }
 
@@ -1396,14 +1400,14 @@ void RoomScene::keyReleaseEvent(QKeyEvent *event) {
             adjustItems();
             break;
         }
-    case Qt::Key_F7: {
-        if (control_is_down) {
-            if (add_robot && add_robot->isVisible())
-                ClientInstance->addRobot();
-        } else if (fill_robots && fill_robots->isVisible())
-            ClientInstance->fillRobots();
-        break;
-    }
+	case Qt::Key_F7: {
+		if (control_is_down) {
+			if (add_robot && add_robot->isVisible())
+				ClientInstance->addRobot();
+		} else if (fill_robots && fill_robots->isVisible())
+			ClientInstance->fillRobots();
+		break;
+	}
     case Qt::Key_F12: {
             if (Self->hasSkill("huashen")) {
                 const Skill *huashen_skill = Sanguosha->getSkill("huashen");
@@ -2253,6 +2257,8 @@ void RoomScene::keepGetCardLog(const CardsMoveStruct &move) {
 void RoomScene::addSkillButton(const Skill *skill) {
     if (skill->inherits("SPConvertSkill")) return;
     // check duplication
+    if (dashboard->getSkillButtonByName(skill->objectName()))
+        return;
     QSanSkillButton *btn = dashboard->addSkillButton(skill->objectName());
     if (btn == NULL) return;
 
@@ -2286,17 +2292,32 @@ void RoomScene::acquireSkill(const ClientPlayer *player, const QString &skill_na
     if (player == Self) addSkillButton(Sanguosha->getSkill(skill_name));
 }
 
-void RoomScene::updateSkillButtons()
+void RoomScene::updateSkillButtons(bool isPrepare)
 {
-    QList<const Skill *> skill_list = Self->getVisibleSkillList();
+    QList<const Skill *> skill_list;
+    if (isPrepare) {
+        if (Self->getGeneral())
+            skill_list << Self->getGeneral()->getVisibleSkillList();
+        if (Self->getGeneral2())
+            skill_list << Self->getGeneral2()->getVisibleSkillList();
+    } else {
+        skill_list = Self->getVisibleSkillList();
+    }
     foreach (const Skill *skill, skill_list) {
+        if (skill->isLordSkill()
+            && (Self->getRole() != "lord"
+            || ServerInfo.GameMode == "06_3v3"
+            || ServerInfo.GameMode == "06_XMode"
+            || ServerInfo.GameMode == "02_1v1"
+            || Config.value("WithoutLordskill", false).toBool()))
+            continue;
+
         addSkillButton(skill);
     }
 
     // disable all skill buttons
-    foreach (QSanSkillButton *button, m_skillButtons) {
+    foreach(QSanSkillButton *button, m_skillButtons)
         button->setEnabled(false);
-    }
 }
 
 void RoomScene::useSelectedCard() {
@@ -2383,7 +2404,10 @@ void RoomScene::useSelectedCard() {
     if (skill)
         dashboard->stopPending();
     else
-        dashboard->retractPileCards("wooden_ox");
+        foreach (const QString &pile, Self->getPileNames()) {
+            if (pile.startsWith("&") || pile == "wooden_ox")
+                dashboard->retractPileCards(pile);
+    }
 }
 
 void RoomScene::onEnabledChange() {
@@ -2555,7 +2579,7 @@ void RoomScene::updateStatus(Client::Status oldStatus, Client::Status newStatus)
             button->setEnabled(vsSkill->isAvailable(Self, reason, pattern) && !pattern.endsWith("!"));
         } else {
             const Skill *skill = button->getSkill();
-            if (skill->getFrequency() == Skill::Wake)
+            if (skill->getFrequency(Self) == Skill::Wake)
                 button->setEnabled(Self->getMark(skill->objectName()) > 0);
             else
                 button->setEnabled(false);
@@ -2597,7 +2621,7 @@ void RoomScene::updateStatus(Client::Status oldStatus, Client::Status newStatus)
             cancel_button->setEnabled(ClientInstance->m_isDiscardActionRefusable);
             discard_button->setEnabled(false);
 
-            QString pattern = Sanguosha->getCurrentCardUsePattern();
+            QString pattern = Sanguosha->currentRoomState()->getCurrentCardUsePattern();
             QRegExp rx("@@?([_A-Za-z]+)(\\d+)?!?");
             if (rx.exactMatch(pattern)) {
                 QString skill_name = rx.capturedTexts().at(1);
@@ -2606,23 +2630,27 @@ void RoomScene::updateStatus(Client::Status oldStatus, Client::Status newStatus)
                     CardUseStruct::CardUseReason reason = CardUseStruct::CARD_USE_REASON_RESPONSE;
                     if (newStatus == Client::RespondingUse)
                         reason = CardUseStruct::CARD_USE_REASON_RESPONSE_USE;
-                    if (!Self->hasFlag(skill_name))
-                        Self->setFlags(skill_name);
+                    QString tempUseFlag = "RoomScene_" + skill_name + "TempUse";
+                    if (!Self->hasFlag(tempUseFlag))
+                        Self->setFlags(tempUseFlag);
                     bool available = skill->isAvailable(Self, reason, pattern);
-                    Self->setFlags("-" + skill_name);
+                    Self->setFlags("-" + tempUseFlag);
+//                     if (!Self->hasFlag(skill_name))
+//                         Self->setFlags(skill_name);
+//                     bool available = skill->isAvailable(Self, reason, pattern);
+//                     Self->setFlags("-" + skill_name);
                     if (!available) {
                         ClientInstance->onPlayerResponseCard(NULL);
                         return;
                     }
                     if (Self->hasSkill(skill_name, true)) {
                         foreach (QSanSkillButton *button, m_skillButtons) {
-                            if (button != NULL) {
-                                const ViewAsSkill *vsSkill = button->getViewAsSkill();
-                                if (vsSkill != NULL && vsSkill->objectName() == skill_name
-                                    && vsSkill->isAvailable(Self, reason, pattern)) {
-                                        button->click();
-                                        break;
-                                }
+                            Q_ASSERT(button != NULL);
+                            const ViewAsSkill *vsSkill = button->getViewAsSkill();
+                            if (vsSkill != NULL && vsSkill->objectName() == skill_name
+                                && vsSkill->isAvailable(Self, reason, pattern)) {
+                                    button->click();
+                                    break;
                             }
                         }
                     }
@@ -2693,15 +2721,6 @@ void RoomScene::updateStatus(Client::Status oldStatus, Client::Status newStatus)
         }
     case Client::AskForSkillInvoke: {
             QString skill_name = ClientInstance->getSkillNameToInvoke();
-            if (skill_name == "shefu_cancel") {
-                QString data = ClientInstance->getSkillNameToInvokeData().split(":").last();
-                if (m_ShefuAskState == ShefuAskNone
-                    || (m_ShefuAskState == ShefuAskNecessary
-                    && Self->getMark("Shefu_" + data) == 0)) {
-                    ClientInstance->onPlayerInvokeSkill(false);
-                    return;
-                }
-            }
             dashboard->highlightEquip(skill_name, true);
             foreach (QSanSkillButton *button, m_skillButtons) {
                 if (button->getSkill()->objectName() == skill_name) {
@@ -2811,6 +2830,24 @@ void RoomScene::onSkillActivated() {
 
         const Card *card = dashboard->pendingCard();
         if (card && card->targetFixed() && card->isAvailable(Self)) {
+            bool instance_use = skill->inherits("ZeroCardViewAsSkill");
+            if (!instance_use) {
+                QList<const Card *> cards;
+                cards << Self->getHandcards() << Self->getEquips();
+
+                foreach (const QString &name, dashboard->getPileExpanded()) {
+                    QList<int> pile = Self->getPile(name);
+                    foreach(int id, pile)
+                        cards << Sanguosha->getCard(id);
+                }
+
+                foreach (const Card *c, cards) {
+                    if (skill->viewFilter(QList<const Card *>(), c))
+                        return;
+                }
+                instance_use = true;
+            }
+            if (instance_use)
             useSelectedCard();
         } else if (skill->inherits("OneCardViewAsSkill") && !skill->getDialog() && Config.EnableIntellectualSelection)
             dashboard->selectOnlyCard(ClientInstance->getStatus() == Client::Playing);
@@ -2920,10 +2957,9 @@ void RoomScene::doDiscardButton() {
 }
 
 void RoomScene::startInXs() {
-    if (control_panel) {
-        control_panel->hide();
-    }
-
+	if (control_panel) {
+		control_panel->hide();
+	}
     if (return_main_menu) {
         return_main_menu->hide();
     }
@@ -2941,9 +2977,9 @@ void RoomScene::changeHp(const QString &who, int delta, DamageStruct::Nature nat
     QString hp = QString::number(player->getHp() + delta);
     QString maxhp = QString::number(player->getMaxHp());
     if (delta < 0) {
-        if (losthp) {
-            Sanguosha->playSystemAudioEffect("hplost", true);
+		Sanguosha->playSystemAudioEffect("decHp", true);
 
+        if (losthp) {
             QString from_general = player->objectName();
             log_box->appendLog("#GetHp", from_general, QStringList(), QString(), hp, maxhp);
             return;
@@ -2952,14 +2988,6 @@ void RoomScene::changeHp(const QString &who, int delta, DamageStruct::Nature nat
         QString damage_effect;
         QString from_general = player->objectName();
         log_box->appendLog("#GetHp", from_general, QStringList(), QString(), hp, maxhp);
-        switch (delta) {
-            case -1: damage_effect = "injure1"; break;
-            case -2: damage_effect = "injure2"; break;
-            case -3:
-            default: damage_effect = "injure3"; break;
-        }
-
-        Sanguosha->playSystemAudioEffect(damage_effect, true);
 
         setEmotion(who, "damage");
 
@@ -2983,7 +3011,7 @@ void RoomScene::changeHp(const QString &who, int delta, DamageStruct::Nature nat
 
 void RoomScene::changeMaxHp(const QString &who, int delta) {
     if (delta < 0) {
-        Sanguosha->playSystemAudioEffect("maxhplost", true);
+        Sanguosha->playSystemAudioEffect("decHp", true);
     }
 
     ClientPlayer *player = ClientInstance->getPlayer(who);
@@ -3024,51 +3052,10 @@ void RoomScene::onGameOver() {
     bool victory = Self->property("win").toBool();
 #ifdef AUDIO_SUPPORT
     QString win_effect;
-    if (victory) {
-        foreach (const Player *player, ClientInstance->getPlayers()) {
-            if (player->property("win").toBool()) {
-                if (player->getGeneralName().contains("caocao")) {
-                    win_effect = "win-cc";
-                }
-                else if (player->getGeneralName().contains("liubei")) {
-                    win_effect = "win-liubei";
-                }
-                else if (player->getGeneralName().contains("sunquan")) {
-                    win_effect = "win-sunquan";
-                }
-                else if (player->getGeneralName().contains("zhangjiao")) {
-                    win_effect = "win-zhangjiao";
-                }
-                else if (player->getGeneralName().contains("yuanshao")) {
-                    win_effect = "win-yuanshao";
-                }
-                else if (player->getGeneralName().contains("caopi")) {
-                    win_effect = "win-caopi";
-                }
-                else if (player->getGeneralName().contains("dongzhuo")) {
-                    win_effect = "win-dongzhuouo";
-                }
-                else if (player->getGeneralName().contains("liushan")) {
-                    win_effect = "win-liushan";
-                }
-                else if (player->getGeneralName().contains("sunce")) {
-                    win_effect = "win-sunce";
-                }
-
-                break;
-            }
-        }
-
-        if (win_effect.isEmpty()) {
-            win_effect = "win";
-        }
-        else {
-            Audio::stopAll();
-        }
-    }
-    else {
+    if (victory)
+        win_effect = "win";
+    else
         win_effect = "lose";
-    }
 
     Sanguosha->playSystemAudioEffect(win_effect);
 #endif
@@ -3508,7 +3495,8 @@ void RoomScene::killPlayer(const QString &who) {
     }
 
     if (Config.EnableEffects && Config.EnableLastWord && !Self->hasFlag("marshalling"))
-        general->lastWord();
+		if (general->hasLastWord())
+			general->lastWord();
     m_roomMutex.unlock();
 }
 
@@ -3623,11 +3611,18 @@ void RoomScene::attachSkill(const QString &skill_name) {
         addSkillButton(skill);
 }
 
-void RoomScene::detachSkill(const QString &skill_name) {
-    QSanSkillButton *btn = dashboard->removeSkillButton(skill_name);
-    if (btn == NULL) return;    //be care LordSkill and SPConvertSkill
-    m_skillButtons.removeAll(btn);
-    btn->deleteLater();
+void RoomScene::detachSkill(const QString &skill_name)
+{
+    // for all the skills has a ViewAsSkill Effect { Client::setMark(const Json::Value &) }
+    // this is a DIRTY HACK!!! for we should prevent the ViewAsSkill button been removed temporily by duanchang
+    if (Self != NULL && Self->getMark("ViewAsSkill_" + skill_name + "Effect") > 0) {
+        Self->setMark("ViewAsSkill_" + skill_name + "Lost", 1);
+    } else {
+        QSanSkillButton *btn = dashboard->removeSkillButton(skill_name);
+        if (btn == NULL) return;    //be care LordSkill and SPConvertSkill
+        m_skillButtons.removeAll(btn);
+        btn->deleteLater();
+    }
 }
 
 void RoomScene::detachAllSkills()
@@ -3711,15 +3706,15 @@ void RoomScene::doGongxin(const QList<int> &card_ids, bool enable_heart, QList<i
 
 void RoomScene::showOwnerButtons(bool owner)
 {
-    if (control_panel && !game_started) {
-        MainWindow *mainWnd = qobject_cast<MainWindow *>(main_window);
-        if (NULL != mainWnd && !mainWnd->isConsoleStart()) {
-            control_panel->hide();
-        }
-        else {
-            control_panel->setVisible(owner);
-        }
-    }
+	if (control_panel && !game_started) {
+		MainWindow *mainWnd = qobject_cast<MainWindow *>(main_window);
+		if (NULL != mainWnd && !mainWnd->isConsoleStart()) {
+			control_panel->hide();
+		}
+		else{
+			control_panel->setVisible(owner);
+		}
+	}
 }
 
 void RoomScene::showPlayerCards() {
@@ -3831,8 +3826,8 @@ void RoomScene::onGameStart() {
         }
     }
 
-    if (control_panel)
-        control_panel->hide();
+	if (control_panel)
+		control_panel->hide();
 
     if (return_main_menu) {
         return_main_menu->hide();
@@ -4949,6 +4944,26 @@ QRect RoomScene::getBubbleChatBoxShowArea(const QString &who) const
     else {
         QRectF rect = dashboard->getAvatarAreaSceneBoundingRect();
         return QRect(QPoint(rect.left() + 8, rect.top() + 52), BUBBLE_CHAT_BOX_SHOW_AREA_SIZE);
+    }
+}
+
+void RoomScene::refashionSkills()
+{
+    QList<const Skill *> skill_list = Self->getVisibleSkillList();
+    QList<QSanInvokeSkillButton *> button_list = dashboard->getAllSkillButtons();
+    foreach (QSanSkillButton *btn, button_list) {
+        const Skill *skill = btn->getSkill();
+        if (!skill_list.contains(skill))
+            detachSkill(skill->objectName());
+        else
+            if (skill)
+                btn->setSkill(skill);
+        skill_list.removeOne(skill);
+    }
+    if (!skill_list.isEmpty()) {
+        foreach (const Skill *skill, skill_list) {
+            attachSkill(skill->objectName());
+        }
     }
 }
 

@@ -137,9 +137,6 @@ public:
     virtual int aliveCount() const = 0;
     int distanceTo(const Player *other, int distance_fix = 0) const;
     void setFixedDistance(const Player *player, int distance);
-    void removeFixedDistance(const Player *player, int distance);
-    void insertAttackRangePair(const Player *player);
-    void removeAttackRangePair(const Player *player);
     const General *getAvatarGeneral() const;
     const General *getGeneral() const;
 
@@ -193,7 +190,6 @@ public:
     void removeMark(const char *mark, int remove_num = 1);
     virtual void setMark(const char *mark, int value);
     int getMark(const char *mark) const;
-    QStringList getMarkNames() const;
 
     void setChained(bool chained);
     bool isChained() const;
@@ -316,6 +312,9 @@ public:
 
     void addVictim(ServerPlayer *victim);
     QList<ServerPlayer *> getVictims() const;
+
+    void startRecord();
+    void saveRecord(const char *filename);
 
     void setNext(ServerPlayer *next);
     ServerPlayer *getNext() const;
@@ -685,7 +684,7 @@ enum TriggerEvent {
     SlashMissed,
 
     JinkEffect,
-    NullificationEffect,
+	NullificationEffect,
 
     CardAsked,
     PreCardResponded,
@@ -1130,9 +1129,6 @@ public:
     void swapSeat(ServerPlayer *a, ServerPlayer *b);
     lua_State *getLuaState() const;
     void setFixedDistance(Player *from, const Player *to, int distance);
-    void removeFixedDistance(Player *from, const Player *to, int distance);
-    void insertAttackRangePair(Player *from, const Player *to);
-    void removeAttackRangePair(Player *from, const Player *to);
     void reverseFor3v3(const Card *card, ServerPlayer *player, QList<ServerPlayer *> &list);
     bool hasWelfare(const ServerPlayer *player) const;
     ServerPlayer *getFront(ServerPlayer *a, ServerPlayer *b) const;

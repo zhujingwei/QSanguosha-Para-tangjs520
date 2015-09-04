@@ -1,0 +1,3 @@
+
+general:sp_guanyu role:lord starter:true hp:3 hand:72 
+general:select role:rebel 

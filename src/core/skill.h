@@ -26,8 +26,6 @@ public:
     explicit Skill(const QString &name, Frequency frequent = NotFrequent);
     bool isLordSkill() const { return lord_skill; }
     bool isAttachedLordSkill() const { return attached_lord_skill; }
-    // usually for attached skill
-    virtual bool shouldBeVisible(const Player *Self) const { return Self != NULL; }
     QString getDescription() const;
     QString getNotice(int index) const;
     bool isVisible() const;
@@ -37,10 +35,10 @@ public:
 
     void initMediaSource();
 
-    Frequency getFrequency() const { return frequency; }
+    virtual Frequency getFrequency(const Player *target = NULL) const;
     QString getLimitMark() const { return limit_mark; }
     QStringList getSources() const { return sources; }
-
+    virtual bool shouldBeVisible(const Player *Self) const; // usually for attached skill
 protected:
     Frequency frequency;
     QString limit_mark;
@@ -114,8 +112,8 @@ class TriggerSkill: public Skill {
 
 public:
     TriggerSkill(const QString &name);
-    const ViewAsSkill *getViewAsSkill() const { return view_as_skill; }
-    QList<TriggerEvent> getTriggerEvents() const { return events; }
+    const ViewAsSkill *getViewAsSkill() const;
+    QList<TriggerEvent> getTriggerEvents() const;
 
     virtual int getPriority(TriggerEvent triggerEvent) const;
     virtual bool triggerable(const ServerPlayer *target, Room *room) const;
@@ -191,18 +189,18 @@ public:
     virtual void onGameStart(ServerPlayer *player) const = 0;
 };
 
-class SPConvertSkill: public GameStartSkill {
+class RetrialSkill : public TriggerSkill
+{
     Q_OBJECT
 
 public:
-    SPConvertSkill(const QString &from, const QString &to);
+    RetrialSkill(const QString &name, bool exchange = false);
 
-    virtual bool triggerable(const ServerPlayer *target) const;
-    virtual void onGameStart(ServerPlayer *player) const;
+    bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const;
+    virtual const Card *onRetrial(ServerPlayer *player, JudgeStruct *judge) const = 0;
 
 private:
-    QString from, to;
-    QStringList to_list;
+    bool exchange;
 };
 
 class ProhibitSkill: public Skill {

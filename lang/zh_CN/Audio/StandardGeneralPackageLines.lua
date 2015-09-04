@@ -2,227 +2,208 @@
 
 return {
 	-- 曹操
-	["$jianxiong1"] = "燕雀安知鸿鹄之志！", 
-	["$jianxiong2"] = "夫英雄者，胸怀大志，腹有良谋！",
-	["$hujia1"] = "大胆逆贼，谁可擒之！", 
-	["$hujia2"] = "护卫何在！", 
-	["~caocao"] = "华佗何在····",
+	["$caocaojianxiong1"] = "燕雀安知鸿鹄之志",
+	["$caocaojianxiong2"] = "夫英雄者，胸怀大志，腹有良谋",
+	["$caocaohujia1"] = "护卫何在",
+	["$caocaohujia2"] = "大胆逆贼，谁可擒之",
+	["~caocao"] = "华佗何在",
 
 	-- 司马懿
-	["$guicai1"] = "才通天地，逆天改命！",
-	["$guicai2"] = "天命难违？哈哈哈哈哈哈！",
-	["$fankui1"] = "哼，正中下怀！",
-	["$fankui2"] = "哼，自作孽，不可活！",
-	["~simayi"] = "我的气数···就到这里了吗？",
+	["$simayiguicai1"] = "天命难违？哈哈哈哈哈哈哈哈",
+	["$simayiguicai2"] = "才通天地，逆天改命",
+	["$simayifankui1"] = "哼！自作孽，不可活",
+	["$simayifankui2"] = "哼，正中下怀",
+	["~simayi"] = "我的气数就到这里了吗",
 
 	-- 夏侯惇
-	["$ganglie1"] = "鼠辈，竟敢伤我！",
-	["$ganglie2"] = "以彼之道，还施彼身！",
-	["$neoganglie1"] = "鼠辈，竟敢伤我！",
-	["$neoganglie2"] = "以彼之道，还施彼身！",
-	["$qingjian"] = "放手一搏吧！",
-	["~xiahoudun"] = "两……两边……都看不见了……",
-	["~neo_xiahoudun"] = "血染沙场，马革裹尸，快哉！快哉！",
+	["$xiahoudunganglie1"] = "伤我者，十倍奉还",
+	["$xiahoudunganglie2"] = "哪个敢动我",
+	["$xiahoudunqingjian1"] = "钱财乃身外之物",
+	["$xiahoudunqingjian2"] = "福生于清俭，德生于卑退",
+	["~xiahoudun"] = "诸多败绩，有负丞相重托",
 
 	-- 张辽
-	["$tuxi1"] = "哼，没想到吧！",
-	["$tuxi2"] = "拿来吧！",
-	["~zhangliao"] = "真的没想到……",
+	["$zhangliaotuxi1"] = "快马突袭，占尽先机",
+	["$zhangliaotuxi2"] = "马似飞影，枪如霹雳",
+	["~zhangliao"] = "被敌人占了先机……呃",
 
 	-- 许褚
-	["$luoyi1"] = "过来打一架，对，就是你！", 
-	["$luoyi2"] = "废话少说！放马过来吧！", 
-	["$neoluoyi1"] = "谁来与我大战三百回合？", 
-	["$neoluoyi2"] = "破！", 
-	["~xuchu"] = "丞相，末将尽力了！",
-	["~neo_xuchu"] = "难保主周全，留此去何用？",
+	["$xuchuluoyi1"] = "过来打一架！对，就是你",
+	["$xuchuluoyi2"] = "废话少说，放马过来吧",
+	["~xuchu"] = "丞相，末将尽力了",
 
 	-- 郭嘉
-	["$tiandu1"] = "就这样吧。",
-	["$tiandu2"] = "哦？",
-	["$yiji1"] = "也好。",
-	["$yiji2"] = "罢了。",
-	["~guojia"] = "咳，咳……",
+	["$guojiatiandu1"] = "天意如此吧",
+	["$guojiatiandu2"] = "那...就这样吧",
+	["$guojiayiji1"] = "依此计行，辽东可定",
+	["$guojiayiji2"] = "锦囊妙策，终定社稷",
+	["~guojia"] = "咳咳咳",
 
 	-- 甄姬
-	["$luoshen1"] = "仿佛兮若轻云之蔽月。",
-	["$luoshen2"] = "飘摇兮若流风之回雪。",
-	["$qingguo1"] = "凌波微步，罗袜生尘。",
-	["$qingguo2"] = "体迅飞凫，飘忽若神。",
-	["~zhenji"] = "悼良会之永绝兮…哀一逝而异乡……",
+	["$zhenjiluoshen1"] = "仿佛兮若轻云之蔽月",
+	["$zhenjiluoshen2"] = "飘摇兮若流风之回雪",
+	["$zhenjiqingguo1"] = "凌波微步，罗袜生尘",
+	["$zhenjiqingguo2"] = "体迅飞凫，飘忽若神",
+	["~zhenji"] = "悼良会之永绝兮，哀一逝而异乡",
+
 	-- 李典
-	["$xunxun"] = "拥兵安民，乃固国之根本。", 
-	["$wangxi"] = "哈哈哈，无妨，你并无害我之心。",
+	["$lidianxunxun1"] = "众将死战，非我之功" ,
+	["$lidianxunxun2"] = "爱兵如子，胜乃可全",
+	["$lidianwangxi1"] = "前尘往事，莫再提起", -- 受到伤害
+	["$lidianwangxi2"] = "大丈夫何拘小节", -- 造成伤害
+	["~lidian"] = "报国杀敌，虽死犹荣",
 
 	-- 刘备
-	["$rende1"] = "惟贤惟德，能服于人。",
-	["$rende2"] = "以德服人。",
-	["$jijiang1"] = "蜀将何在？",
-	["$jijiang2"] = "尔等敢应战否？",
-	["~liubei"] = "这就是……桃园吗……",
+	["$liubeirende1"] = "以德服人",
+	["$liubeirende2"] = "惟贤惟德，能服于人",
+	["$liubeijijiang1"] = "蜀将何在",
+	["$liubeijijiang2"] = "尔等敢应战否",
+	["~liubei"] = "这就是桃园吗",
 
 	-- 关羽
-	["$wusheng1"] = "逆贼！哪里走！",
-	["$wusheng2"] = "刀锋所向，战无不克！", 
-	["$yijue1"] = "关某，向来恩怨分明。", 
-	["$yijue2"] = "恩已断，义当绝！",
-	["~guanyu"] = "桃园一拜，恩义常在！",
+	["$guanyuwusheng1"] = "逆贼，哪里走",
+	["$guanyuwusheng2"] = "刀锋所向，战无不克",
+	["$guanyuyijue1"] = "恩已断，义当绝",
+	["$guanyuyijue2"] = "关某向来恩怨分明",
+	["~guanyu"] = "桃园一拜，恩义常在",
 
 	-- 张飞
-	["$paoxiao1"] = "今，必斩汝马下！",
-	["$paoxiao2"] = "喝啊！",
-	["$tishen2"] = "欺我无谋？定要尔等血偿！",
-	["$tishen1"] = "谁！还敢过来一战？！",
-	["~zhangfei"] = "桃园一拜，此生无憾！",
+	["$zhangfeipaoxiao1"] = "喝啊",
+	["$zhangfeipaoxiao2"] = "今必斩汝马下",
+	["$zhangfeitishen1"] = "谁还敢过来一战",
+	["$zhangfeitishen2"] = "欺我无谋，定要尔等血偿",
+	["~zhangfei"] = "桃园一拜，此生无憾",
 
 	-- 诸葛亮
-	["$guanxing1"] = "观今夜天象，知天下大事。",
-	["$guanxing2"] = "知天易，逆天难。",
-	["$kongcheng1"] = "（抚琴声）", 
-	["$kongcheng2"] = "（抚琴声）", 
-	["~zhugeliang"] = "将星陨落……天命难违……",
+	["$zhugeliangguanxing1"] = "观今夜天象，知天下大事",
+	["$zhugeliangguanxing2"] = "知天易，逆天难",
+	["$zhugeliangkongcheng1"] = "（抚琴声）",
+	["$zhugeliangkongcheng2"] = "（抚琴声）",
+	["~zhugeliang"] = "将星陨落，天命难违",
 
 	-- 赵云
-	["$longdan1"] = "龙威虎胆，斩敌破阵！", 
-	["$longdan2"] = "进退自如，游刃有余！",
-	["$yajiao1"] = "策马趋前，斩敌当先！",
-	["$yajiao2"] = "遍寻天下，但求一败！",
-	["~zhaoyun"] = "有（问？）谁！还敢···再上！",
+	["$zhaoyunlongdan1"] = "龙威虎胆，斩敌破阵",
+	["$zhaoyunlongdan2"] = "进退自如，游刃有余",
+	["$zhaoyunyajiao1"] = "策马趋前，斩敌当先",
+	["$zhaoyunyajiao2"] = "遍寻天下，但求一败",
+	["~zhaoyun"] = "你们谁……还敢再上",
 
 	-- 马超
-	["$tieji1"] = "目标敌阵，全军突击！",
-	["$tieji2"] = "敌人阵形已乱，随我杀",
-	["~machao"] = "请将我葬在西凉。。",
-	-- 徐庶
-	["$zhuhai"] = "吾誓不为汝設谋！",
-	["$qianxin"] = "此乃贤达之士！",
-	["$jianyan"] = "天下之任，愿君莫辞！",
+	["$machaotieji1"] = "目标敌阵，全军突击",
+	["$machaotieji2"] = "敌人阵型已乱，随我杀",
+	["~machao"] = "请将我葬在西凉",
 
 	-- 黄月英
-	["$jizhi1"] = "哼~",
-	["$jizhi2"] = "哼哼~",
-	["~huangyueying"] = "亮……",
+	["$huangyueyingjizhi1"] = "哼哼",
+	["$huangyueyingjizhi2"] = "哼嗯",
+	["~huangyueying"] = "亮",
+
+	-- 徐庶
+	["$st_xushuqianxin1"] = "既遇明主，天下可图",
+	["$st_xushuqianxin2"] = "弃武从文，安邦卫国",
+	["$st_xushujianyan1"] = "开言纳谏，社稷之福",
+	["$st_xushujianyan2"] = "如此如此，敌军自破",
+	["$st_xushuzhuhai1"] = "善恶有报，天道轮回",
+	["$st_xushuzhuhai2"] = "早知今日，何必当初",
+	["~st_xushu"] = "母亲……孩儿尽孝来了",
 
 	-- 孙权
-	["$zhiheng1"] = "容我三思。",
-	["$zhiheng2"] = "且慢。",
-	["$jiuyuan1"] = "有汝辅佐，甚好！",
-	["$jiuyuan2"] = "好舒服啊。",
-	["~sunquan"] = "父亲……大哥……仲谋愧矣……",
+	["$sunquanzhiheng1"] = "容我三思",
+	["$sunquanzhiheng2"] = "且慢",
+	["$sunquanjiuyuan1"] = "有汝辅佐，甚好",
+	["$sunquanjiuyuan2"] = "好舒服啊",
+	["~sunquan"] = "父亲，大哥，仲谋愧矣",
 
 	-- 甘宁
-	["$qixi1"] = "你用不了这么多了！",
-	["$qixi2"] = "弟兄们，准备动手",
-	["$fenwei1"] = "喝，敢欺负我东吴无人！",
-	["$fenwei2"] = "奋勇当先，威名远扬",
-	["~ganning"] = "二十年后……又是一条……好汉……",
+	["$ganningqixi1"] = "你用不了这么多了",
+	["$ganningqixi2"] = "弟兄们，准备动手",
+	["$ganningfenwei1"] = "哼，敢欺我东吴无人",
+	["$ganningfenwei2"] = "奋勇当先，威名远扬",
+	["~ganning"] = "别管我……继续上",
 
 	-- 吕蒙
-	["$keji1"] = "最好的机会，还在等着我！",
-	["$keji2"] = "蓄力待时，不争首功！",
-	["$qinxue1"] = "勤以修身，学以报国！",
-	["$qinxue2"] = "兵书熟读，了然于胸！",
-	["$gongxin3"] = "洞若观火，运筹帷幄！",
-	["$gongxin4"] = "哼！早知如此！",
-	["~lvmeng"] = "—你~~~给我等着！",
+	["$lvmengkeji1"] = "最好的机会还在等着我",
+	["$lvmengkeji2"] = "蓄力待时，不争首功",
+	["$lvmengqinxue1"] = "勤以修身，学以报国",
+	["$lvmengqinxue2"] = "兵书熟读，了然于胸",
+	["$lvmenggongxin1"] = "哼，早知如此",
+	["$lvmenggongxin2"] = "洞若观火，运筹帷幄",
+	["~lvmeng"] = "你……给我等着",
 
 	-- 黄盖
-	["$kurou1"] = "为成大义，死不足惜！",
-	["$kurou2"] = "我这把老骨头，不算什么！",
-	["$zhaxiang1"] = "两军阵前，不斩降将！",
-	["$zhaxiang2"] = "铁索连舟而行，东吴水师可破！",
-	["~huanggai"] = "盖~有负公瑾重托~~",
+	["$huanggaikurou1"] = "我这把老骨头不算什么",
+	["$huanggaikurou2"] = "为成大义，死不足惜",
+	["$huanggaizhaxiang1"] = "铁索连舟而行，东吴水师可破",
+	["$huanggaizhaxiang2"] = "两军阵前，不斩降将",
+	["~huanggai"] = "盖……有负公瑾重托",
 
 	-- 周瑜
-	["$yingzi1"] = "哈哈哈哈……", 
-	["$yingzi2"] = "伯符，且看我这一手！",
-	["$fanjian1"] = "抉择吧，在苦与痛的地狱中！", 
-	["$fanjian2"] = "与我为敌就当这般生不如死！", 
-	["$neofanjian1"] = "兵者，诡道也。", 
-	["$neofanjian2"] = "汝性多疑，不攻自破！", 
-	["~zhouyu"] = "既生瑜……何生……",
-	["~neo_zhouyu"] = "血色映河山，无缘再抚弦……",
+	["$zhouyuyingzi1"] = "哈哈哈哈哈哈哈哈",
+	["$zhouyuyingzi2"] = "伯符，且看我这一手",
+	["$zhouyufanjian1"] = "与我为敌，就当这般生不如死",
+	["$zhouyufanjian2"] = "抉择吧，在苦与痛的地狱中",
+	["~zhouyu"] = "既生瑜，何生亮……既生瑜，何生亮",
 
 	-- 大乔
-	["$guose1"] = "请休息吧。", 
-	["$guose2"] = "你累了。", 
-	["$liuli1"] = "交给你了。", 
-	["$liuli2"] = "你来嘛~", 
-	["~daqiao"] = "伯符……我去了……",
+	["$daqiaoliuli1"] = "伯符不在身边，我要自己保重",
+	["$daqiaoliuli2"] = "帮帮人家嘛",
+	["$daqiaoliuli5"] = "不懂得怜香惜玉么",
+	["$daqiaoliuli6"] = "嘿嘿，交给你了",
+	["$daqiaoguose1"] = "旅途劳顿，请下马休整吧",
+	["$daqiaoguose2"] = "还没到休息的时候",
+	["~daqiao"] = "伯符，再也没人能欺负我了",
 
 	-- 陆逊
-	["$qianxun1"] = "儒生脱尘，不为贪逸淫乐之事。",
-	["$qianxun2"] = "谦谦君子，不饮盗泉之水。",
-	["$lianying1"] = "牌不是万能的，但是没牌是万万不能的。",
-	["$lianying2"] = "旧的不去，新的不来。",
-	["~luxun"] = "我还是太年轻了……",
+	["$luxunqianxun1"] = "谦谦君子，温润如玉",
+	["$luxunqianxun2"] = "满招损，谦受益",
+	["$luxunlianying1"] = "失之淡然，得之坦然",
+	["$luxunlianying2"] = "生生不息，源源不绝",
+	["~luxun"] = "我的未尽之业",
 
 	-- 孙尚香
-	["$jieyin1"] = "夫君，身体要紧。", 
-	["$jieyin2"] = "他好，我也好。", 
-	["$xiaoji1"] = "哼！", 
-	["$xiaoji2"] = "看我的厉害！", 
-	["~sunshangxiang"] = "不……还不可以死……",
+	["$sunshangxiangjieyin1"] = "夫君，身体要紧",
+	["$sunshangxiangjieyin2"] = "他好，我也好",
+	["$sunshangxiangxiaoji1"] = "哼",
+	["$sunshangxiangxiaoji2"] = "看我的厉害",
+	["~sunshangxiang"] = "不！还不可以死",
 
 	-- 华佗
-	["$jijiu1"] = "救死扶伤，悬壶济世。",
-	["$jijiu2"] = "妙手仁心，药到病除。",
-	["$chuli1"] = "病去如抽丝。", 
-	["$chuli2"] = "病入膏肓，需下猛药。", 
-	["$qingnang1"] = "越老越要补啊。",
-	["$qingnang2"] = "早睡早起，方能养生。",
-	["~huatuo"] = "医者……不能……自医啊……",
+	["$huatuojijiu1"] = "妙手仁心，药到病除",
+	["$huatuojijiu2"] = "救死扶伤，悬壶济世",
+	["$huatuochuli1"] = "病入膏肓，需下猛药",
+	["$huatuochuli2"] = "病去，如抽丝",
+	["~huatuo"] = "生老病死，命不可违",
 
 	-- 吕布
-	["$wushuang1"] = "三个齐上也不是我的对手！",
-	["$wushuang2"] = "还有哪个敢挑战我！",
-	["$liyu1"] = "人不为己，天诛地灭！",
-	["$liyu2"] = "大丈夫相时而动！",
-	
-	["~lvbu"] = "我竟然输了，不可能……",
-	
-	-- 公孙瓒
-	["$qiaomeng1"] = "秣马厉兵，枕戈待战！",
-	["$qiaomeng2"] = "夺敌辎重，以为己用！",
-["$yicong1"] = "列阵锋指，直取要害！",
-	["$yicong2"] = "变阵冲鄂，以守代攻！",
-	["~gongsunzan"] = "皇图霸业梦，父亲~抑~郁~终~！",
-	
+	["$lvbuwushuang1"] = "三个齐上也不是我的对手",
+	["$lvbuwushuang2"] = "还有哪个敢挑战我",
+	["$lvbuliyu1"] = "人不为己，天诛地灭",
+	["$lvbuliyu2"] = "大丈夫相时而动",
+	["~lvbu"] = "我竟然输了，不可能",
+
 	-- 貂蝉
-	["$biyue1"] = "失礼了~",
-	["$biyue2"] = "羡慕吧~",
-	["$lijian1"] = "嗯哼哼~~哼哼~~",
-	["$lijian2"] = "夫君，你要替妾身做主啊……",
-	["~diaochan"] = "父亲大人……对不起……",
+	["$diaochanbiyue1"] = "失礼了",
+	["$diaochanbiyue2"] = "羡慕吧",
+	["$diaochanlijian1"] = "嗯哼哼~~嗯哼",
+	["$diaochanlijian2"] = "夫君，你要替妾身做主啊",
+	["~diaochan"] = "父亲大人，对不起",
 
-	-- 华雄
-	["cv:st_huaxiong"] = "玉皇贰弟",
-	["$yaowu1"] = "都是小伤，不必理会！",
-	["$yaowu2"] = "这厮好大的力气！",
-	["$yaowu3"] = "唉，这厮不易对付！", -- 关羽
-	["~st_huaxiong"] = "太自负了么……",
+	--华雄
+	["$st_huaxiongyaowu1"] = "哼！先让你尝点儿甜头",
+	["$st_huaxiongyaowu2"] = "大人有大量，不和你计较",
 
-	-- 袁术
-	["$wangzun1"] = "玉玺在手，天下我有！",
-	["$wangzun2"] = "大汉天下，已半入我手！",
-	["$tongji"] = "你们都得听我的号令！",
+	--袁术
+	["$st_yuanshuwangzun1"] = "真命天子，八方拜服",
+	["$st_yuanshuwangzun2"] = "归顺于我，封爵赏地",
+	["$st_yuanshutongji1"] = "弑君之罪，当诛九族",
+	["$st_yuanshutongji2"] = "你..你这是反了",
+	["~st_yuanshu"] = "把玉玺..还给我",
 
-	-- 测试包
-	-- 高达一号
-	["cv:gaodayihao"] = "猎狐",
-	["$noslonghun1"] = "金甲映日，驱邪祛秽！", -- 黑桃
-	["$noslonghun2"] = "腾龙行云，首尾不见！", -- 梅花
-	["$noslonghun3"] = "潜龙于渊，涉灵愈伤！", -- 红桃
-	["$noslonghun4"] = "千里一怒，红莲灿世！", -- 方片
-	["$noslonghun5"] = "龙战于野，其血玄黄！", -- 夺剑
-	["~gaodayihao"] = "血染鳞甲……龙坠九天……",
-	["$nosjuejing"] = "龙战于野，其血玄黄！",
-	
-	-- 制霸孙权
-	["$super_zhiheng1"] = "容我三思。",
-	["$super_zhiheng2"] = "且慢！",
-	
-	-- 五星诸葛亮
-	["$super_guanxing1"] = "观今夜天象，知天下大事。",
-	["$super_guanxing2"] = "知天易，逆天难。",
+	-- 公孙瓒
+	["$st_gongsunzanyicong1"] = "列阵锋矢，直取要害", -- +1 -> -1
+	["$st_gongsunzanyicong2"] = "变阵冲厄，以守待攻", -- -1 -> +1
+	["$st_gongsunzanqiaomeng1"] = "秣马厉兵，整戈待战",
+	["$st_gongsunzanqiaomeng2"] = "夺敌辎重，以为己用",
+	["~st_gongsunzan"] = "皇图霸业梦，付之一炬中",
+
 }

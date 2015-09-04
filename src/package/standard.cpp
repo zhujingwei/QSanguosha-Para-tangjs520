@@ -132,7 +132,8 @@ void GlobalEffect::onUse(Room *room, const CardUseStruct &card_use) const{
                 log.arg2 = objectName();
                 room->sendLog(log);
 
-                room->broadcastSkillInvoke(skill->objectName());
+				player->broadcastSkillInvoke(skill->objectName());
+				room->notifySkillInvoked(player, skill->objectName());
             }
         } else {
             targets << player;
@@ -191,7 +192,8 @@ void AOE::onUse(Room *room, const CardUseStruct &card_use) const{
                 log.arg2 = objectName();
                 room->sendLog(log);
 
-                room->broadcastSkillInvoke(skill->objectName());
+				player->broadcastSkillInvoke(skill->objectName());
+				room->notifySkillInvoked(player, skill->objectName());
             }
         } else {
             targets << player;
@@ -243,9 +245,7 @@ void DelayedTrick::onUse(Room *room, const CardUseStruct &card_use) const{
 }
 
 void DelayedTrick::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
-    QStringList nullified_list = room->getTag("CardUseNullifiedList").toStringList();
-    bool all_nullified = nullified_list.contains("_ALL_TARGETS");
-    if (all_nullified || targets.isEmpty()) {
+    if (targets.isEmpty()) {
         if (movable) {
             onNullified(source);
             if (room->getCardOwner(getEffectiveId()) != source) return;
@@ -317,13 +317,15 @@ void DelayedTrick::onNullified(ServerPlayer *target) const{
                     log.arg2 = objectName();
                     room->sendLog(log);
 
-                    room->broadcastSkillInvoke(skill->objectName());
+					player->broadcastSkillInvoke(skill->objectName());
+					room->notifySkillInvoked(player, skill->objectName());
                 }
                 continue;
             }
 
             CardMoveReason reason(CardMoveReason::S_REASON_TRANSFER, target->objectName(), QString(), this->getSkillName(), QString());
             room->moveCardTo(this, target, player, Player::PlaceDelayedTrick, reason, true);
+			this->setTag("move_from", QVariant::fromValue(target));
 
             if (target == player) break;
 

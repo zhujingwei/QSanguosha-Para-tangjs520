@@ -4,6 +4,7 @@
 #include "standard.h"
 #include "ai.h"
 #include "settings.h"
+#include "recorder.h"
 #include "banpair.h"
 #include "lua-wrapper.h"
 #include "jsonutils.h"
@@ -17,7 +18,7 @@ const int ServerPlayer::S_NUM_SEMAPHORES = NUMBER_OF_SEMAS;
 ServerPlayer::ServerPlayer(Room *room)
     : Player(room), m_isClientResponseReady(false), m_isWaitingReply(false),
       socket(NULL), room(room),
-      ai(NULL), trust_ai(new TrustAI(this)),
+      ai(NULL), trust_ai(new TrustAI(this)), recorder(NULL),
       _m_phases_index(0), next(NULL), _m_clientResponse(Json::nullValue)
 {
     semas = new QSemaphore *[S_NUM_SEMAPHORES];
@@ -43,8 +44,46 @@ Room *ServerPlayer::getRoom() const{
     return room;
 }
 
-void ServerPlayer::broadcastSkillInvoke(const QString &card_name) const{
-    room->broadcastSkillInvoke(card_name, isMale(), -1);
+void ServerPlayer::broadcastSkillInvoke(const QString &skill_name, int type /*= -1*/, int start) const
+{
+	if (Sanguosha->getSkill(skill_name)) {
+		if (type == 0 || type == -2) return;
+		const Skill *skill = Sanguosha->getSkill(skill_name);
+		QString skillName = skill_name;
+		if (skill->isLordSkill() && !isLord() && hasSkill("weidi"))
+			skillName = "weidi";
+		if (type == -1) {
+			if (getMark(skillName + start + "invoked") == 0)
+				type = qrand() % 2 + start;
+            else {
+                if (getMark(skillName + start + "invoked") == start)
+                    type = start + 1;
+                else
+                    type = start;
+            }
+            room->setPlayerMark((ServerPlayer *)this, skillName + start + "invoked", type);
+		}
+
+		QString name = NULL;
+		QString huashen_name = tag["huashenGenaral"].toString();
+		const General *general = Sanguosha->getGeneral(huashen_name);
+		if (getGeneral()->hasSkill(skillName))
+			name = getGeneralName();
+		else if (getGeneral2() != NULL && getGeneral2()->hasSkill(skillName))
+			name = getGeneral2Name();
+		else if (getGeneral()->getRelatedSkillNames().contains(skillName))
+			name = getGeneralName();
+		else if (getGeneral2() != NULL && getGeneral2()->getRelatedSkillNames().contains(skillName))
+			name = getGeneral2Name();
+		else if (general != NULL && general->hasSkill(skillName))
+			name = huashen_name;
+		else
+			return;
+		room->broadcastSkillInvoke(skillName, name, type);
+	}
+	else {
+		room->broadcastSkillInvoke(skill_name, isMale(), type);
+	}
 }
 
 void ServerPlayer::broadcastSkillInvoke(const Card *card) const{
@@ -69,7 +108,7 @@ void ServerPlayer::broadcastSkillInvoke(const Card *card) const{
             else
                 room->broadcastSkillInvoke(card->getCommonEffectName(), "common");
         } else
-            room->broadcastSkillInvoke(skill_name, index);
+            broadcastSkillInvoke(skill_name, index);
     }
 }
 
@@ -178,6 +217,12 @@ bool ServerPlayer::askForSkillInvoke(const QString &skill_name, const QVariant &
     return room->askForSkillInvoke(this, skill_name, data);
 }
 
+bool ServerPlayer::askForSkillInvoke(const Skill *skill, const QVariant &data /* = QVariant() */)
+{
+	Q_ASSERT(skill != NULL);
+	return askForSkillInvoke(skill->objectName(), data);
+}
+
 QList<int> ServerPlayer::forceToDiscard(int discard_num, bool include_equip, bool is_discard, const QString &pattern) {
     QList<int> to_discard;
 
@@ -230,6 +275,9 @@ void ServerPlayer::setSocket(ClientSocket *socket) {
 
 void ServerPlayer::unicast(const QString &message) {
     emit message_ready(message);
+
+    if (recorder)
+        recorder->recordLine(message);
 }
 
 void ServerPlayer::startNetworkDelayTest() {
@@ -240,6 +288,15 @@ void ServerPlayer::startNetworkDelayTest() {
 
 qint64 ServerPlayer::endNetworkDelayTest() {
     return test_time.msecsTo(QDateTime::currentDateTime());
+}
+
+void ServerPlayer::startRecord() {
+    recorder = new Recorder(this);
+}
+
+void ServerPlayer::saveRecord(const QString &filename) {
+    if (recorder)
+        recorder->save(filename);
 }
 
 void ServerPlayer::addToSelected(const QString &general) {
@@ -916,7 +973,6 @@ void ServerPlayer::introduceTo(ServerPlayer *player) {
 void ServerPlayer::marshal(ServerPlayer *player) const{
     room->notifyProperty(player, this, "maxhp");
     room->notifyProperty(player, this, "hp");
-    room->notifyProperty(player, this, "gender");
 
     const General *general = getGeneral();
     if (general && getKingdom() != general->getKingdom()) {
@@ -1069,8 +1125,8 @@ void ServerPlayer::marshal(ServerPlayer *player) const{
     }
 }
 
-void ServerPlayer::addToPile(const QString &pile_name, const Card *card, bool open,
-    const QList<ServerPlayer *> &open_players) {
+void ServerPlayer::addToPile(const QString &pile_name, const Card *card, bool open, QList<ServerPlayer *> open_players)
+{
     QList<int> card_ids;
     if (card->isVirtualCard())
         card_ids = card->getSubcards();
@@ -1079,34 +1135,33 @@ void ServerPlayer::addToPile(const QString &pile_name, const Card *card, bool op
     return addToPile(pile_name, card_ids, open, open_players);
 }
 
-void ServerPlayer::addToPile(const QString &pile_name, int card_id, bool open,
-    const QList<ServerPlayer *> &open_players) {
+void ServerPlayer::addToPile(const QString &pile_name, int card_id, bool open, QList<ServerPlayer *> open_players)
+{
     QList<int> card_ids;
     card_ids << card_id;
     return addToPile(pile_name, card_ids, open, open_players);
 }
 
-void ServerPlayer::addToPile(const QString &pile_name, const QList<int> &card_ids, bool open,
-    const QList<ServerPlayer *> &open_players) {
+void ServerPlayer::addToPile(const QString &pile_name, QList<int> card_ids, bool open, QList<ServerPlayer *> open_players)
+{
     return addToPile(pile_name, card_ids, open, open_players, CardMoveReason());
 }
 
-void ServerPlayer::addToPile(const QString &pile_name, const QList<int> &card_ids,
-    bool open, const QList<ServerPlayer *> &open_players, const CardMoveReason &reason) {
-    QList<ServerPlayer *> openPlayers;
+void ServerPlayer::addToPile(const QString &pile_name, QList<int> card_ids,
+    bool open, QList<ServerPlayer *> open_players, CardMoveReason reason)
+{
     if (!open) {
-        openPlayers = open_players;
-        if (openPlayers.isEmpty()) {
-            foreach(int id, card_ids) {
+        if (open_players.isEmpty()) {
+            foreach (int id, card_ids) {
                 ServerPlayer *owner = room->getCardOwner(id);
-                if (owner && !openPlayers.contains(owner))
-                    openPlayers << owner;
+                if (owner && !open_players.contains(owner))
+                    open_players << owner;
             }
         }
     } else {
-        openPlayers = room->getAllPlayers();
+        open_players = room->getAllPlayers();
     }
-    foreach (ServerPlayer *p, openPlayers)
+    foreach(ServerPlayer *p, open_players)
         setPileOpen(pile_name, p->objectName());
     piles[pile_name].append(card_ids);
 

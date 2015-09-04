@@ -76,7 +76,6 @@ bool Dashboard::isAvatarUnderMouse() {
 void Dashboard::hideControlButtons() {
     m_btnReverseSelection->hide();
     m_btnSortHandcard->hide();
-    m_btnShefu->hide();
 }
 
 void Dashboard::showProgressBar(const Countdown &countdown) {
@@ -153,7 +152,7 @@ void Dashboard::_updateFrames() {
     QRect rect2 = QRect(0, 0, this->width(), G_DASHBOARD_LAYOUT.m_normalHeight);
     trusting_item->setPos(0, 0);
     trusting_text->setPos((rect2.width() - Config.BigFont.pixelSize() * 4.5) / 2,
-                          (rect2.height() - Config.BigFont.pixelSize()) / 2);
+        (rect2.height() - Config.BigFont.pixelSize()) / 2);
 
     Q_ASSERT(button_widget);
     button_widget->setX(rect.width() - getButtonWidgetWidth());
@@ -283,12 +282,9 @@ void Dashboard::_addHandCard(CardItem *card_item, bool prepend, const QString &f
 
     card_item->setHomeOpacity(1.0);
     card_item->setRotation(0.0);
-
     card_item->setFlags(ItemIsFocusable);
-    if (Config.EnableSuperDrag) {
+    if (Config.EnableSuperDrag)
         card_item->setFlag(ItemIsMovable);
-    }
-
     card_item->setZValue(0.1);
     if (!footnote.isEmpty()) {
         card_item->setFootnote(footnote);
@@ -299,7 +295,7 @@ void Dashboard::_addHandCard(CardItem *card_item, bool prepend, const QString &f
     else
         m_handCards.append(card_item);
 
-     connect(card_item, SIGNAL(released()), this, SLOT(onCardItemClicked()));
+    connect(card_item, SIGNAL(released()), this, SLOT(onCardItemClicked()));
 
     //将主界面移除的"反选"和"整理手牌"功能，转移到右键菜单来实现
     connect(card_item, SIGNAL(context_menu_event_triggered()), this, SLOT(onCardItemContextMenu()));
@@ -481,15 +477,11 @@ QSanSkillButton *Dashboard::addSkillButton(const QString &skillName) {
     Q_ASSERT(skill && !skill->inherits("WeaponSkill") && !skill->inherits("ArmorSkill") && !skill->inherits("TreasureSkill"));
 #endif
 
-    QSanSkillButton *skillBtn = _m_skillDock->getSkillButtonByName(skillName);
-    if (NULL != skillBtn) {
-        _m_button_recycle.append(skillBtn);
-        return NULL;
-    }
-
-    if (skillName == "shefu") {
-        m_btnShefu->show();
-    }
+//     QSanSkillButton *skillBtn = _m_skillDock->getSkillButtonByName(skillName);
+//     if (NULL != skillBtn) {
+// //         _m_button_recycle.append(skillBtn);
+// //         return NULL;
+//     }
 
     return _m_skillDock->addSkillButtonByName(skillName);
 }
@@ -509,21 +501,16 @@ QSanSkillButton *Dashboard::removeSkillButton(const QString &skillName) {
     }
     _mutexEquipAnim.unlock();
     if (btn == NULL) {
-        QSanSkillButton *temp = _m_skillDock->getSkillButtonByName(skillName);
-        if (_m_button_recycle.contains(temp))
-            _m_button_recycle.removeOne(temp);
-        else {
-            if (skillName == "shefu") {
-                m_btnShefu->hide();
-            }
+//         QSanSkillButton *temp = _m_skillDock->getSkillButtonByName(skillName);
+//         if (_m_button_recycle.contains(temp))
+//             _m_button_recycle.removeOne(temp);
+//         else
             btn = _m_skillDock->removeSkillButtonByName(skillName);
-        }
     }
     return btn;
 }
 
-void Dashboard::removeAllSkillButtons()
-{
+void Dashboard::removeAllSkillButtons() {
     _mutexEquipAnim.lock();
     for (int i = 0; i < S_EQUIP_AREA_LENGTH; ++i) {
         if (NULL != _m_equipSkillBtns[i]) {
@@ -553,24 +540,18 @@ void Dashboard::_createExtraButtons() {
     m_btnSortHandcard = new QSanButton("handcard", "sort", this);
     m_btnNoNullification = new QSanButton("handcard", "nullification", this);
     m_btnNoNullification->setStyle(QSanButton::S_STYLE_TOGGLE);
-    m_btnShefu = new QSanButton("handcard", "shefu", this);
     // @todo: auto hide.
-    qreal pos = G_DASHBOARD_LAYOUT.m_leftWidth, height = -m_btnReverseSelection->boundingRect().height();
-    m_btnReverseSelection->setPos(pos, height);
-    pos += m_btnReverseSelection->boundingRect().right();
-    m_btnSortHandcard->setPos(pos, height);
-    pos += m_btnSortHandcard->boundingRect().right();
-    m_btnShefu->setPos(pos, height);
+    m_btnReverseSelection->setPos(G_DASHBOARD_LAYOUT.m_leftWidth, -m_btnReverseSelection->boundingRect().height());
+    m_btnSortHandcard->setPos(m_btnReverseSelection->boundingRect().right() + G_DASHBOARD_LAYOUT.m_leftWidth,
+        -m_btnSortHandcard->boundingRect().height());
 
     m_btnNoNullification->hide();
     m_btnReverseSelection->hide();
     m_btnSortHandcard->hide();
-    m_btnShefu->hide();
 
     connect(m_btnReverseSelection, SIGNAL(clicked()), this, SLOT(reverseSelection()));
     connect(m_btnSortHandcard, SIGNAL(clicked()), this, SLOT(sortCards()));
     connect(m_btnNoNullification, SIGNAL(clicked()), this, SLOT(cancelNullification()));
-    connect(m_btnShefu, SIGNAL(clicked()), this, SLOT(setShefuState()));
 
     _m_sort_menu = new QMenu(RoomSceneInstance->mainWindow());
     _m_sort_menu->setTitle(tr("Sort handcards"));
@@ -588,8 +569,6 @@ void Dashboard::_createExtraButtons() {
     QAction *reverseSelectionAction = _m_carditem_context_menu->addAction(tr("Reverse selection"));
     connect(reverseSelectionAction, SIGNAL(triggered()), this, SLOT(reverseSelection()));
     _m_carditem_context_menu->addMenu(_m_sort_menu);
-
-    _m_shefu_menu = new QMenu(RoomSceneInstance->mainWindow());
 }
 
 void Dashboard::skillButtonActivated() {
@@ -625,7 +604,10 @@ void Dashboard::skillButtonDeactivated() {
 }
 
 void Dashboard::selectAll() {
-    retractPileCards("wooden_ox");
+    foreach (const QString &pile, Self->getPileNames()) {
+        if (pile.startsWith("&") || pile == "wooden_ox")
+            retractPileCards(pile);
+    }
     if (view_as_skill) {
         unselectAll();
         foreach (CardItem *card_item, m_handCards) {
@@ -878,24 +860,15 @@ QList<CardItem *> Dashboard::removeCardItems(const QList<int> &card_ids, Player:
     return result;
 }
 
-void Dashboard::updateAvatar()
-{
-    PlayerCardContainer::updateAvatar();
-    _m_skillDock->update();
-}
-
-static bool CompareByNumber(const CardItem *a, const CardItem *b)
-{
+static bool CompareByNumber(const CardItem *a, const CardItem *b)  {
     return Card::CompareByNumber(a->getCard(), b->getCard());
 }
 
-static bool CompareBySuit(const CardItem *a, const CardItem *b)
-{
+static bool CompareBySuit(const CardItem *a, const CardItem *b)  {
     return Card::CompareBySuit(a->getCard(), b->getCard());
 }
 
-static bool CompareByType(const CardItem *a, const CardItem *b)
-{
+static bool CompareByType(const CardItem *a, const CardItem *b)  {
     return Card::CompareByType(a->getCard(), b->getCard());
 }
 
@@ -932,10 +905,10 @@ void Dashboard::reverseSelection() {
             item->clickItem();
             selected_items << item;
         }
-    foreach (CardItem *item, m_handCards)
-        if (item->isEnabled() && !selected_items.contains(item))
-            item->clickItem();
-    adjustCards();
+        foreach (CardItem *item, m_handCards)
+            if (item->isEnabled() && !selected_items.contains(item))
+                item->clickItem();
+        adjustCards();
 }
 
 
@@ -944,7 +917,7 @@ void Dashboard::cancelNullification() {
     if (Sanguosha->getCurrentCardUseReason() == CardUseStruct::CARD_USE_REASON_RESPONSE_USE
         && Sanguosha->getCurrentCardUsePattern() == "nullification"
         && RoomSceneInstance->isCancelButtonEnabled()) {
-        RoomSceneInstance->doCancelButton();
+            RoomSceneInstance->doCancelButton();
     }
 }
 
@@ -953,53 +926,6 @@ void Dashboard::controlNullificationButton(bool show) {
 
     m_btnNoNullification->setState(QSanButton::S_STATE_UP);
     m_btnNoNullification->setVisible(show);
-}
-
-void Dashboard::setShefuState() {
-    QMenu *menu = _m_shefu_menu;
-    menu->clear();
-    menu->setTitle(tr("Shefu"));
-
-    foreach (const QString &mark_name, Self->getMarkNames()) {
-        if (mark_name.startsWith("Shefu_")) {
-            int id = Self->getMark(mark_name) - 1;
-            if (id == -1) continue;
-            const Card *c = Sanguosha->getCard(id);
-            QString card_name = mark_name.mid(6);
-            QString name = QString("%1 [%2]").arg(c->getFullName()).arg(Sanguosha->translate(card_name));
-            menu->addAction(G_ROOM_SKIN.getCardSuitPixmap(c->getSuit()), name);
-        }
-    }
-
-    menu->addSeparator();
-
-    QAction *action1 = menu->addAction(tr("Shefu Ask All"));
-    action1->setData((int)RoomScene::ShefuAskAll);
-    action1->setCheckable(true);
-    action1->setChecked(RoomSceneInstance->m_ShefuAskState == RoomScene::ShefuAskAll);
-
-    QAction *action2 = menu->addAction(tr("Shefu Ask Necessary"));
-    action2->setData((int)RoomScene::ShefuAskNecessary);
-    action2->setCheckable(true);
-    action2->setChecked(RoomSceneInstance->m_ShefuAskState == RoomScene::ShefuAskNecessary);
-
-    QAction *action3 = menu->addAction(tr("Shefu Ask None"));
-    action3->setData((int)RoomScene::ShefuAskNone);
-    action3->setCheckable(true);
-    action3->setChecked(RoomSceneInstance->m_ShefuAskState == RoomScene::ShefuAskNone);
-
-    connect(action1, SIGNAL(triggered()), this, SLOT(changeShefuState()));
-    connect(action2, SIGNAL(triggered()), this, SLOT(changeShefuState()));
-    connect(action3, SIGNAL(triggered()), this, SLOT(changeShefuState()));
-
-    QPointF posf = QCursor::pos();
-    menu->popup(QPoint(posf.x(), posf.y()));
-}
-
-void Dashboard::changeShefuState() {
-    QAction *action = qobject_cast<QAction *>(sender());
-    Q_ASSERT(action);
-    RoomSceneInstance->m_ShefuAskState = (RoomScene::ShefuAskState)(action->data().toInt());
 }
 
 void Dashboard::disableAllCards() {
@@ -1011,7 +937,10 @@ void Dashboard::disableAllCards() {
 
 void Dashboard::enableCards() {
     m_mutexEnableCards.lock();
-    expandPileCards("wooden_ox");
+    foreach (const QString &pile, Self->getPileNames()) {
+        if (pile.startsWith("&") || pile == "wooden_ox")
+            expandPileCards(pile);
+    }
     foreach (CardItem *card_item, m_handCards)
         card_item->setEnabled(card_item->getCard()->isAvailable(Self));
     m_mutexEnableCards.unlock();
@@ -1036,12 +965,22 @@ void Dashboard::startPending(const ViewAsSkill *skill) {
         if (resp_skill && (resp_skill->getRequest() == Card::MethodResponse || resp_skill->getRequest() == Card::MethodUse))
             expand = true;
     }
-    if (expand)
-        expandPileCards("wooden_ox");
-    else {
-        retractPileCards("wooden_ox");
-        if (skill && !skill->getExpandPile().isEmpty())
-            expandPileCards(skill->getExpandPile());
+
+    retractAllSkillPileCards();
+    if (expand) {
+        foreach (const QString &pile, Self->getPileNames()) {
+            if (pile.startsWith("&") || pile == "wooden_ox")
+                expandPileCards(pile);
+        }
+    } else {
+        foreach (const QString &pile, Self->getPileNames()) {
+            if (pile.startsWith("&") || pile == "wooden_ox")
+                retractPileCards(pile);
+        }
+        if (skill && !skill->getExpandPile().isEmpty()) {
+            foreach(const QString &pile_name, skill->getExpandPile().split(","))
+                expandPileCards(pile_name);
+        }
     }
 
     for (int i = 0; i < S_EQUIP_AREA_LENGTH; ++i) {
@@ -1065,7 +1004,10 @@ void Dashboard::stopPending() {
     }
     view_as_skill = NULL;
     pending_card = NULL;
-    retractPileCards("wooden_ox");
+    foreach (const QString &pile, Self->getPileNames()) {
+        if (pile.startsWith("&") || pile == "wooden_ox")
+            retractPileCards(pile);
+    }
     emit card_selected(NULL);
 
     foreach (CardItem *item, m_handCards) {
@@ -1091,21 +1033,36 @@ void Dashboard::stopPending() {
 void Dashboard::expandPileCards(const QString &pile_name) {
     if (_m_pile_expanded.contains(pile_name)) return;
     _m_pile_expanded << pile_name;
-    QList<int> pile = Self->getPile(pile_name);
+    QString new_name = pile_name;
+    QList<int> pile;
+    if (new_name.startsWith("%")) {
+        new_name = new_name.mid(1);
+        foreach(const Player *p, Self->getAliveSiblings())
+            pile += p->getPile(new_name);
+    } else {
+        pile = Self->getPile(new_name);
+    }
     if (pile.isEmpty()) return;
     QList<CardItem *> card_items = _createCards(pile);
-
     CardsMoveStruct move;
     move.from_place = Player::PlaceWoodenOx;
     move.to_place = Player::PlaceHand;
-    move.from_pile_name = Sanguosha->translate(pile_name);
+    move.from_pile_name = Sanguosha->translate(new_name);
     addCardItems(card_items, move);
 }
 
 void Dashboard::retractPileCards(const QString &pile_name) {
     if (!_m_pile_expanded.contains(pile_name)) return;
     _m_pile_expanded.removeOne(pile_name);
-    QList<int> pile = Self->getPile(pile_name);
+    QString new_name = pile_name;
+    QList<int> pile;
+    if (new_name.startsWith("%")) {
+        new_name = new_name.mid(1);
+        foreach(const Player *p, Self->getAliveSiblings())
+            pile += p->getPile(new_name);
+    } else {
+        pile = Self->getPile(new_name);
+    }
     if (pile.isEmpty()) return;
     CardItem *card_item;
     foreach (int card_id, pile) {
@@ -1116,10 +1073,19 @@ void Dashboard::retractPileCards(const QString &pile_name) {
             m_handCards.removeOne(card_item);
             card_item->disconnect(this);
             delete card_item;
+            card_item = NULL;
         }
     }
     adjustCards();
     update();
+}
+
+void Dashboard::retractAllSkillPileCards()
+{
+    foreach (const QString &pileName, _m_pile_expanded) {
+        if (!(pileName.startsWith("&") || pileName == "wooden_ox"))
+            retractPileCards(pileName);
+    }
 }
 
 void Dashboard::onCardItemClicked() {
@@ -1504,4 +1470,14 @@ void Dashboard::updateRolesForHegemony(const QString &generalName)
         disconnect(ClientInstance, SIGNAL(general_choosed(const QString &)),
             this, SLOT(updateRolesForHegemony(const QString &)));
     }
+}
+
+QSanInvokeSkillButton * Dashboard::getSkillButtonByName(const QString &skillName) const
+{
+    return _m_skillDock->getSkillButtonByName(skillName);
+}
+
+const QList<QSanInvokeSkillButton *> Dashboard::getAllSkillButtons() const
+{
+    return _m_skillDock->getAllSkillButtons();
 }

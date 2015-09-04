@@ -291,7 +291,6 @@ class Shengxi: public TriggerSkill {
 public:
     Shengxi(): TriggerSkill("shengxi") {
         events << PreDamageDone << EventPhaseEnd;
-        frequency = Frequent;
         global = true;
     }
 
@@ -320,7 +319,6 @@ class Shoucheng: public TriggerSkill {
 public:
     Shoucheng(): TriggerSkill("shoucheng") {
         events << CardsMoveOneTime;
-        frequency = Frequent;
     }
 
     virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
@@ -634,7 +632,6 @@ class Qiluan : public TriggerSkill
 public:
     Qiluan() : TriggerSkill("qiluan") {
         events << Death << EventPhaseChanging;
-        frequency = Frequent;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const {

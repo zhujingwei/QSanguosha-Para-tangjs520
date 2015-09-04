@@ -1,29 +1,25 @@
+-- 谋溃
 sgs.ai_skill_invoke.moukui = function(self, data)
 	local target = data:toPlayer()
-	self.moukuitarget = target
-	if self:isFriend(target) then return target:getArmor() and self:needToThrowArmor(target) else return true end
+	sgs.moukui_target = target
+	if self:isFriend(target) then return self:needToThrowArmor(target) else return true end
 end
 
 sgs.ai_skill_choice.moukui = function(self, choices, data)
-	local target = self.moukuitarget
-	if not target then return "draw" end
-	if self:isEnemy(target) and self:doNotDiscard(target, "he", false, 1, "moukui") then return "draw" end
+	local target = sgs.moukui_target
+	if self:isEnemy(target) and self:doNotDiscard(target) then
+		return "draw"
+	end
 	return "discard"
 end
 
-sgs.ai_skill_cardchosen.moukui = function(self, who, flags)
-	local use = self.room:getTag("MoukuiDiscard"):toCardUse()
-	self.moukui_effect = use.card
-	local id = self:askForCardChosen(who, flags, "dummy")
-	self.moukui_effect = nil
-	return id
-end
-
+-- 天命
 sgs.ai_skill_invoke.tianming = function(self, data)
 	self.tianming_discard = nil
 	if hasManjuanEffect(self.player) then return false end
-	if self.player:hasArmorEffect("eight_diagram") and self.player:getCardCount() == 2 then return false end
-	if self:getCardsNum("Jink") == 0 or self.player:isNude() then return true end
+	if self.player:isNude() then return true end
+	if not self:canHit() and self.player:getCards("he"):length() < 3 then return false end
+	if self:canHit() then return true end
 	local unpreferedCards = {}
 	local cards = sgs.QList2Table(self.player:getHandcards())
 
@@ -91,12 +87,15 @@ sgs.ai_skill_discard.tianming = function(self, discard_num, min_num, optional, i
 	end
 end
 
+-- 密诏
 local mizhao_skill = {}
 mizhao_skill.name = "mizhao"
 table.insert(sgs.ai_skills, mizhao_skill)
 mizhao_skill.getTurnUseCard = function(self)
 	if self.player:hasUsed("MizhaoCard") or self.player:isKongcheng() then return end
-	return sgs.Card_Parse("@MizhaoCard=.")
+	if self:needBear() then return end
+	local parsed_card = sgs.Card_Parse("@MizhaoCard=.")
+	return parsed_card
 end
 
 sgs.ai_skill_use_func.MizhaoCard = function(card, use, self)
@@ -121,7 +120,7 @@ sgs.ai_skill_use_func.MizhaoCard = function(card, use, self)
 		self.friends_noself = sgs.reverse(self.friends_noself)
 		if count < 1 then return end
 		for _, friend in ipairs(self.friends_noself) do
-			if not friend:hasSkill("manjuan") and friend:hasSkills("tuntian+zaoxian") and not self:isWeak(friend) then
+			if friend:hasSkills("tuntian+zaoxian") and not friend:hasSkill("manjuan") and not self:isWeak(friend) then
 				target = friend
 				break
 			end
@@ -157,7 +156,7 @@ sgs.ai_playerchosen_intention.mizhao = 10
 
 sgs.ai_skill_playerchosen.mizhao = function(self, targets)
 	self:sort(self.enemies, "defense")
-	local slash = sgs.cloneCard("slash")
+	local slash = sgs.Sanguosha:cloneCard("slash")
 	local from
 	for _, player in sgs.qlist(self.room:getOtherPlayers(self.player)) do
 		if player:hasFlag("AI_MizhaoTarget") then
@@ -168,7 +167,7 @@ sgs.ai_skill_playerchosen.mizhao = function(self, targets)
 	end
 	if from then
 		for _, to in ipairs(self.enemies) do
-			if targets:contains(to) and self:slashIsEffective(slash, to, nil, from) and not self:getDamagedEffects(to, from, true)
+			if targets:contains(to) and self:slashIsEffective(slash, to, from) and not self:getDamagedEffects(to, from, true)
 				and not self:needToLoseHp(to, from, true) and not self:findLeijiTarget(to, 50, from) then
 				return to
 			end
@@ -214,14 +213,15 @@ function sgs.ai_skill_pindian.mizhao(minusecard, self, requestor, maxcard)
 	return maxcard or cards[1]
 end
 
+-- 竭缘
 sgs.ai_skill_cardask["@jieyuan-increase"] = function(self, data)
 	local damage = data:toDamage()
 	local target = damage.to
-	if self:isFriend(target) then return "." end
-	if self:hasSilverLionEffect(target) then return "." end
+	if not self:isEnemy(target) then return "." end
+	if target:hasArmorEffect("silver_lion") then return "." end
 	local cards = sgs.QList2Table(self.player:getHandcards())
 	self:sortByKeepValue(cards)
-	for _, card in ipairs(cards) do
+	for _,card in ipairs(cards) do
 		if card:isBlack() then return "$" .. card:getEffectiveId() end
 	end
 	return "."
@@ -233,14 +233,14 @@ sgs.ai_skill_cardask["@jieyuan-decrease"] = function(self, data)
 	self:sortByKeepValue(cards)
 	if damage.card and damage.card:isKindOf("Slash") then
 		if self:hasHeavySlashDamage(damage.from, damage.card, self.player) then
-			for _, card in ipairs(cards) do
+			for _,card in ipairs(cards) do
 				if card:isRed() then return "$" .. card:getEffectiveId() end
 			end
 		end
 	end
 	if self:getDamagedEffects(self.player, damage.from) and damage.damage <= 1 then return "." end
 	if self:needToLoseHp(self.player, damage.from) and damage.damage <= 1 then return "." end
-	for _, card in ipairs(cards) do
+	for _,card in ipairs(cards) do
 		if card:isRed() then return "$" .. card:getEffectiveId() end
 	end
 	return "."
@@ -250,6 +250,7 @@ function sgs.ai_cardneed.jieyuan(to, card)
 	return to:getHandcardNum() < 4 and (to:getHp() >= 3 and true or card:isRed())
 end
 
+-- 焚心
 sgs.ai_skill_invoke.fenxin = function(self, data)
 	local target = data:toPlayer()
 	local target_role = sgs.evaluatePlayerRole(target)

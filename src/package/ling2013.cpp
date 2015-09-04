@@ -818,7 +818,6 @@ public:
 class Neo2013Chengxiang: public MasochismSkill {
 public:
     Neo2013Chengxiang(): MasochismSkill("neo2013chengxiang") {
-        frequency = Frequent;
     }
 
     virtual void onDamaged(ServerPlayer *target, const DamageStruct &damage) const{
@@ -1257,7 +1256,6 @@ class Neo2013Yingbing: public TriggerSkill {
 public:
     Neo2013Yingbing(): TriggerSkill("neo2013yingbing") {
         events << StartJudge;
-        frequency = Frequent;
     }
 
     virtual int getPriority() const{
@@ -1679,7 +1677,6 @@ public:
 class Neo2013Jingce: public TriggerSkill{
 public:
     Neo2013Jingce(): TriggerSkill("neo2013jingce"){
-        frequency = Frequent;
         events << EventPhaseEnd << CardUsed << CardResponded;
     }
 

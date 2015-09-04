@@ -2,70 +2,75 @@
 
 return {
 	-- 曹冲
-	["$chengxiang1"] = "依我看，小事一桩。",
-	["$chengxiang2"] = "孰重孰轻，一称便知。",
-	["$renxin1"] = "仁者爱人，人恒爱之。",
-	["$renxin2"] = "有我在，别怕。",
-	["~caochong"] = "子桓哥哥……",
+	["$caochongchengxiang1"] = "依我看，小事一桩",
+	["$caochongchengxiang2"] = "孰重孰轻，一称便知",
+	["$caochongrenxin1"] = "仁者爱人，人恒爱之",
+	["$caochongrenxin2"] = "有我在，别怕",
+	["~caochong"] = "子桓哥哥",
 
 	-- 伏皇后
-	["$qiuyuan1"] = "逆贼逞凶，卿可灭之。",
-	["$qiuyuan2"] = "求父亲救救大汉江山吧！", -- 对伏完
-	["$zhuikong1"] = "诚惶诚恐，夜不能寐。",
-	["$zhuikong2"] = "嘘，隔墙有耳。",
-	["~fuhuanghou"] = "陛下为何不救臣妾……", 
+	["$fuhuanghouqiuyuan1"] = "逆贼逞凶，卿可灭之",
+	["$fuhuanghouqiuyuan2"] = "求父亲救救大汉江山吧",
+	["$fuhuanghouzhuikong1"] = "诚惶诚恐，夜不能寐",
+	["$fuhuanghouzhuikong2"] = "嘘，隔墙有耳",
+	["~fuhuanghou"] = "陛下为何不救臣妾", 
 
 	-- 关平
-	["$longyin1"] = "破阵杀敌，愿献犬马之劳！",
-	["$longyin2"] = "虎啸既响，龙吟当附！", -- 红杀
-	["~guanping"] = "父亲快走，孩儿断后……",
+	["$guanpinglongyin1"] = "破阵杀敌，愿献犬马之劳",
+	["$guanpinglongyin2"] = "虎啸既响，龙吟当附",
+	["~guanping"] = "父亲快走，孩儿断后",
 
 	-- 郭淮
-	["$jingce1"] = "方策精详，有备无患。",
-	["$jingce2"] = "精兵据敌，策守如山。",
-	["~guohuai"] = "姜维小儿，竟然……",
-
-	-- 简雍
-	["$qiaoshui1"] = "合则两利，斗则两伤。",
-	["$qiaoshui2"] = "君且安坐，听我一言。",
-	["$zongshih1"] = "买卖不成，情义还在。",
-	["$zongshih2"] = "此等小事，何须挂耳？",
-	["~jianyong"] = "两国交战……不斩……",
-
-	-- 李儒
-	["$juece1"] = "哼，你走投无路了。",
-	["$juece2"] = "无用之人，死！",
-	["$mieji1"] = "宁错杀，毋放过！",
-	["$mieji2"] = "你能逃得出我的手掌心吗？",
-	["$fencheng1"] = "我得不到的，你们也别想得到！",
-	["$fencheng2"] = "让这一切都灰飞烟灭吧！哼哼哼……",
-	["~liru"] = "如遇明主，大业必成……",
+	["$guohuaijingce1"] = "方策精详，有备无患",
+	["$guohuaijingce2"] = "精兵据敌，策守如山",
+	["~guohuai"] = "姜维小儿，竟然",
 
 	-- 刘封
-	["$xiansi1"] = "袭人于不意，溃敌于无形!",
-	["$xiansi2"] = "破敌军阵，父亲定会刮目相看!",
-	["$xiansi3"] = "此乃孟达之计，非我所愿！", -- 被杀
-	["$xiansi4"] = "我有何罪？！", -- 被杀
-	["~liufeng"] = "父亲，为什么……",
+	["$liufengxiansi1"] = "袭人于不意，溃敌于无形",
+	["$liufengxiansi2"] = "破敌军阵，父亲定会刮目相看",
+	["$liufengxiansi3"] = "此乃孟达之计，非我所愿",
+	["$liufengxiansi4"] = "我有何罪",
+	["~liufeng"] = "父亲，为什么",
 
 	-- 满宠
-	["$junxing1"] = "严刑峻法，以破奸诡之胆。",
-	["$junxing2"] = "你招还是不招？",
-	["$yuce1"] = "御敌之策，成竹在胸。",
-	["$yuce2"] = "以缓制急，不战屈兵。",
-	["~manchong"] = "援军为何迟迟未到……",
+	["$manchongjunxing1"] = "严刑峻法，以破精鬼之胆",
+	["$manchongjunxing2"] = "你招还是不招",
+	["$manchongyuce1"] = "御敌之策，成竹在胸",
+	["$manchongyuce2"] = "以缓制急，不战屈兵",
+	["~manchong"] = "援军为何迟迟未到",
 
 	-- 潘璋马忠
-	["$duodao1"] = "这刀岂是你配用的？",
-	["$duodao2"] = "夺敌兵刃，如断其臂！",
-	["$anjian1"] = "击其懈怠，攻其不备！",
-	["$anjian2"] = "哼，你满身都是破绽！",
-	["~panzhangmazhong"] = "怎么可能，我明明亲手将你……",
+	["$panzhangmazhongduodao1"] = "这刀岂是你配用的",
+	["$panzhangmazhongduodao2"] = "夺敌兵刃，如断其臂",
+	["$panzhangmazhonganjian1"] = "击其懈怠，攻其不备",
+	["$panzhangmazhonganjian2"] = "哼，你满身都是破绽",
+	["~panzhangmazhong"] = "怎么可能，我明明亲手将你",
 
-	-- 虞翻
-	["$zongxuan1"] = "依易设象，以占吉凶。",
-	["$zongxuan2"] = "世间万物皆有定数。",
-	["$zhiyan1"] = "志节分明，折而不屈。",
-	["$zhiyan2"] = "直言劝谏，不惧祸否。",
-	["~yufan"] = "我枉称东方朔再世……",
+    -- 李儒
+	["$lirujuece1"] = "哼，你走投无路了",
+	["$lirujuece2"] = "无用之人，死",
+	["$lirumieji1"] = "宁错杀，毋放过",
+	["$lirumieji2"] = "你，能逃得出我的手掌心吗",
+	["$lirufencheng1"] = "我得不到的，你们也别想得到",
+	["$lirufencheng2"] = "让这一切都灰飞烟灭吧，哼哼哼哼",
+	["~liru"] = "如遇明主大业必成",
+
+	--简雍
+	["$jianyongqiaoshui1"] = "和则两利，斗则两伤",
+	["$jianyongqiaoshui2"] = "君且安坐，听我一言",
+	["$jianyongzongshih1"] = "买卖不成，情义还在",
+	["$jianyongzongshih2"] = "此等小事，何须挂耳",
+	["~jianyong"] = "额啊两国交战不斩",
+
+	--虞翻
+	["$yufanzongxuan1"] = "依易设象，以占吉凶",
+	["$yufanzongxuan2"] = "世间万物，皆有定数",
+	["$yufanzhiyan1"] = "志节分明，折而不屈",
+	["$yufanzhiyan2"] = "直言劝谏，不惧祸否",
+	["~yufan"] = "我枉称东方朔在世",
+	
+	--朱然
+	["$zhurandanshou1"] = "到此为止了",
+	["$zhurandanshou2"] = "以胆为守，扼敌咽喉",
+	["~zhuran"] = "何人，竟有如此之胆",
 }

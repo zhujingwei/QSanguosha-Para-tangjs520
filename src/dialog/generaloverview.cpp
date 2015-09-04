@@ -402,6 +402,14 @@ void GeneralOverview::addLines(const Skill *skill) {
     if (audioSources.isEmpty()) {
         useHeroSkinSkillAudios = false;
         audioSources = skill->getSources();
+		QString general_name = getCurrentSelectedGeneralName();
+		QString file_path = QString("/%1/").arg(general_name);
+		foreach (QString source, audioSources) {
+			if (!source.contains(file_path))
+				audioSources.removeOne(source);
+		}
+
+
     }
     addLinesHelper(skillName, audioSources, useHeroSkinSkillAudios);
 }
@@ -474,131 +482,23 @@ void GeneralOverview::on_tableWidget_itemSelectionChanged() {
         if (last_word.startsWith("~")) {
             last_word = Sanguosha->heroSkinTranslate("~" + general_name);
         }
-        if (last_word.startsWith("~") && general_name.contains("_")) {
-            last_word = Sanguosha->heroSkinTranslate("~" + general_name.split("_").last() + "-" + heroSkinName);
-            if (last_word.startsWith("~")) {
-                last_word = Sanguosha->heroSkinTranslate(("~") + general_name.split("_").last());
-            }
-        }
     }
-    if (last_word.isEmpty() || last_word.startsWith("~")) {
-        last_word = Sanguosha->translate("~" + general_name);
-        if (last_word.startsWith("~") && general_name.contains("_"))
-            last_word = Sanguosha->translate(("~") + general_name.split("_").last());
-    }
+	if (general->hasLastWord()) {
+		if (last_word.isEmpty() || last_word.startsWith("~")) {
+			last_word = Sanguosha->translate("~" + general_name);
+		}
 
-    if (!last_word.startsWith("~")) {
-        QCommandLinkButton *death_button = new QCommandLinkButton(tr("Death"), last_word);
-        button_layout->addWidget(death_button);
+        if (last_word.startsWith("~"))
+            last_word = tr("Translation missing");
+		if (!last_word.startsWith("~")) {
+			QCommandLinkButton *death_button = new QCommandLinkButton(tr("Death"), last_word);
+			button_layout->addWidget(death_button);
 
-        connect(death_button, SIGNAL(clicked()), general, SLOT(lastWord()));
+			connect(death_button, SIGNAL(clicked()), general, SLOT(lastWord()));
 
-        addCopyAction(death_button);
-    }
-
-    if (general_name.contains("caocao")) {
-        QCommandLinkButton *win_button = new QCommandLinkButton(tr("Victory"),
-                                                                tr("Six dragons lead my chariot, "
-                                                                   "I will ride the wind with the greatest speed."
-                                                                   "With all of the feudal lords under my command,"
-                                                                   "to rule the world with one name!"));
-
-        button_layout->addWidget(win_button);
-        addCopyAction(win_button);
-
-        win_button->setObjectName("audio/system/win-cc.ogg");
-        connect(win_button, SIGNAL(clicked()), this, SLOT(playAudioEffect()));
-    }
-    else if (general_name.contains("liubei")) {
-        QCommandLinkButton *win_button = new QCommandLinkButton(tr("Victory"),
-                                                                tr("liubeiwin!"));
-
-        button_layout->addWidget(win_button);
-        addCopyAction(win_button);
-
-        win_button->setObjectName("audio/system/win-liubei.ogg");
-        connect(win_button, SIGNAL(clicked()), this, SLOT(playAudioEffect()));
-    }
-    else if (general_name.contains("sunquan")) {
-        QCommandLinkButton *win_button = new QCommandLinkButton(tr("Victory"),
-                                                                tr("sunquanwin!"));
-
-        button_layout->addWidget(win_button);
-        addCopyAction(win_button);
-
-        win_button->setObjectName("audio/system/win-sunquan.ogg");
-        connect(win_button, SIGNAL(clicked()), this, SLOT(playAudioEffect()));
-    }
-    else if (general_name.contains("zhangjiao")) {
-        QCommandLinkButton *win_button = new QCommandLinkButton(tr("Victory"),
-                                                                tr("zhangjiaowin!"));
-
-        button_layout->addWidget(win_button);
-        addCopyAction(win_button);
-
-        win_button->setObjectName("audio/system/win-zhangjiao.ogg");
-        connect(win_button, SIGNAL(clicked()), this, SLOT(playAudioEffect()));
-    }
-    else if (general_name.contains("yuanshao")) {
-        QCommandLinkButton *win_button = new QCommandLinkButton(tr("Victory"),
-                                                                tr("yuanshaowin!"));
-
-        button_layout->addWidget(win_button);
-        addCopyAction(win_button);
-
-        win_button->setObjectName("audio/system/win-yuanshao.ogg");
-        connect(win_button, SIGNAL(clicked()), this, SLOT(playAudioEffect()));
-    }
-    else if (general_name.contains("caopi")) {
-        QCommandLinkButton *win_button = new QCommandLinkButton(tr("Victory"),
-                                                                tr("caopiwin!"));
-
-        button_layout->addWidget(win_button);
-        addCopyAction(win_button);
-
-        win_button->setObjectName("audio/system/win-caopi.ogg");
-        connect(win_button, SIGNAL(clicked()), this, SLOT(playAudioEffect()));
-    }
-    else if (general_name.contains("dongzhuo")) {
-        QCommandLinkButton *win_button = new QCommandLinkButton(tr("Victory"),
-                                                                tr("dongzhuowin!"));
-
-        button_layout->addWidget(win_button);
-        addCopyAction(win_button);
-
-        win_button->setObjectName("audio/system/win-dongzhuo.ogg");
-        connect(win_button, SIGNAL(clicked()), this, SLOT(playAudioEffect()));
-    }
-    else if (general_name.contains("liushan")) {
-        QCommandLinkButton *win_button = new QCommandLinkButton(tr("Victory"),
-                                                                tr("liushanwin!"));
-
-        button_layout->addWidget(win_button);
-        addCopyAction(win_button);
-
-        win_button->setObjectName("audio/system/win-liushan.ogg");
-        connect(win_button, SIGNAL(clicked()), this, SLOT(playAudioEffect()));
-    }
-    else if (general_name.contains("sunce")) {
-        QCommandLinkButton *win_button = new QCommandLinkButton(tr("Victory"),
-                                                                tr("suncewin!"));
-
-        button_layout->addWidget(win_button);
-        addCopyAction(win_button);
-
-        win_button->setObjectName("audio/system/win-sunce.ogg");
-        connect(win_button, SIGNAL(clicked()), this, SLOT(playAudioEffect()));
-    }
-    else if (general_name == "shenlvbu1" || general_name == "shenlvbu2") {
-        QCommandLinkButton *stage_change_button = new QCommandLinkButton(tr("Stage Change"),
-                                                                         tr("Trashes, the real fun is just beginning!"));
-
-        button_layout->addWidget(stage_change_button);
-        addCopyAction(stage_change_button);
-
-        stage_change_button->setObjectName("audio/system/stagechange.ogg");
-        connect(stage_change_button, SIGNAL(clicked()), this, SLOT(playAudioEffect()));
-    }
+			addCopyAction(death_button);
+		}
+	}
 
     QString designer_text = Sanguosha->translate("designer:" + general_name);
     if (!designer_text.startsWith("designer:"))
@@ -817,8 +717,10 @@ void GeneralOverview::addLinesHelper(const QString &skillName, const QStringList
                 }
             }
             if (skill_line.isEmpty() || skill_line.startsWith("$")) {
-                skill_line = Sanguosha->translate("$" + filename);
+                skill_line = Sanguosha->translate("$" + getCurrentSelectedGeneralName() + filename);
             }
+            if (skill_line.startsWith("$"))
+                skill_line = tr("Translation missing");
 
             button->setDescription(skill_line);
             connect(button, SIGNAL(clicked()), this, SLOT(playAudioEffect()));

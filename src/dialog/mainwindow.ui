@@ -29,7 +29,7 @@
     </property>
     <addaction name="actionStart_Server"/>
     <addaction name="actionStart_Game"/>
-    <addaction name="actionPC_Console_Start"/>
+	<addaction name="actionPC_Console_Start"/>
     <addaction name="actionReplay"/>
     <addaction name="actionExit"/>
    </widget>

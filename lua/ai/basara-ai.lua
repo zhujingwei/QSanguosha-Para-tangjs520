@@ -51,11 +51,6 @@ sgs.ai_skill_choice.RevealGeneral = function(self, choices)
 	end
 end
 
-sgs.ai_skill_choice.CompanionEffect = function(self, choices)
-	if self:isWeak() and self.player:isWounded() then return "recover" end
-	return "draw"
-end
-
 if sgs.GetConfig("EnableHegemony", false) then
 	local init = SmartAI.initialize
 	function SmartAI:initialize(player)
@@ -97,12 +92,7 @@ if sgs.GetConfig("EnableHegemony", false) then
 		wei = {},
 		wu = {},
 		shu = {},
-		qun = {},
-		ye0 = {},
-		ye1 = {},
-		ye2 = {},
-		ye3 = {},
-		ye4 = {}
+		qun = {}
 	}
 	sgs.ai_explicit = {}
 
@@ -143,7 +133,7 @@ if sgs.GetConfig("EnableHegemony", false) then
 			if kingdom == "god" then kingdom = sgs.ai_explicit[aplayer:objectName()] end
 			if kingdom then plieges[kingdom] = (plieges[kingdom] or 0) + 1 end
 		end
-		local kingdoms = { "wei", "wu", "shu", "qun", "ye0", "ye1", "ye2", "ye3", "ye4" }
+		local kingdoms = { "wei", "wu", "shu", "qun" }
 		local max_kingdom = 0
 		for _, akingdom in ipairs(kingdoms) do
 			if (plieges[akingdom] or 0) > max_kingdom then max_kingdom = plieges[akingdom] end
@@ -200,7 +190,7 @@ if sgs.GetConfig("EnableHegemony", false) then
 
 	sgs.updateIntention = function(player, to, intention)
 		intention = -intention
-		local kingdoms = { "wei", "wu", "shu", "qun", "ye0", "ye1", "ye2", "ye3", "ye4" }
+		local kingdoms = { "wei", "wu", "shu", "qun" }
 		if player:getKingdom() ~= "god" then
 			for _, akingdom in ipairs(kingdoms) do
 				sgs.ai_loyalty[akingdom][player:objectName()] = -160

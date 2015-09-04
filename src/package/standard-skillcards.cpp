@@ -12,9 +12,9 @@ ZhihengCard::ZhihengCard() {
 
 void ZhihengCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &) const{
     if (source->hasInnateSkill("zhiheng") || !source->hasSkill("jilve"))
-        room->broadcastSkillInvoke("zhiheng");
+        source->broadcastSkillInvoke("zhiheng");
     else
-        room->broadcastSkillInvoke("jilve", 4);
+        source->broadcastSkillInvoke("jilve", 4);
     if (source->isAlive())
         room->drawCards(source, subcards.length(), "zhiheng");
 }
@@ -130,6 +130,7 @@ void JieyinCard::onEffect(const CardEffectStruct &effect) const{
 }
 
 TuxiCard::TuxiCard() {
+	mute = true;
 }
 
 bool TuxiCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -199,7 +200,6 @@ void LianyingCard::onEffect(const CardEffectStruct &effect) const{
 }
 
 LijianCard::LijianCard(bool cancelable): duel_cancelable(cancelable) {
-    mute = true;
 }
 
 bool LijianCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -228,8 +228,6 @@ void LijianCard::onUse(Room *room, const CardUseStruct &card_use) const{
 
     thread->trigger(PreCardUsed, room, card_use.from, data);
     use = data.value<CardUseStruct>();
-
-    room->broadcastSkillInvoke("lijian");
 
     LogMessage log;
     log.from = card_use.from;
@@ -419,6 +417,7 @@ void GuoseCard::onEffect(const CardEffectStruct &effect) const{
 }
 
 JijiangCard::JijiangCard() {
+    mute = true;
 }
 
 bool JijiangCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -433,14 +432,11 @@ const Card *JijiangCard::validate(CardUseStruct &cardUse) const{
     QList<ServerPlayer *> targets = cardUse.to;
     Room *room = liubei->getRoom();
 
-    if (liubei->hasSkill("weidi")) {
-        room->broadcastSkillInvoke("weidi");
-    }
-    else {
-        liubei->broadcastSkillInvoke(this);
-    }
-
-    room->notifySkillInvoked(liubei, "jijiang");
+    QString skillName = "jijiang";
+    if (liubei->hasFlag("qinwangjijiang"))
+        skillName = "qinwang";
+    liubei->broadcastSkillInvoke(skillName);
+    room->notifySkillInvoked(liubei, skillName);
 
     LogMessage log;
     log.from = liubei;
@@ -468,6 +464,8 @@ const Card *JijiangCard::validate(CardUseStruct &cardUse) const{
         }
 
         if (slash) {
+            if (liubei->hasFlag("qinwangjijiang"))
+                liege->drawCards(1);
             foreach (ServerPlayer *target, targets)
                 target->setFlags("-JijiangTarget");
 

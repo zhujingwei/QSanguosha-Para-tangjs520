@@ -171,6 +171,7 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
             log.type = "$AppendSeparator";
             room->sendLog(log);
             room->addPlayerMark(player, "Global_TurnCount");
+            room->setPlayerMark(player, "damage_point_round", 0);
             if (room->getMode() == "04_boss" && player->isLord()) {
                 int turn = player->getMark("Global_TurnCount");
                 if (turn == 1)
@@ -221,6 +222,7 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
                 room->setPlayerFlag(player, ".");
                 room->clearPlayerCardLimitation(player, true);
             } else if (change.to == Player::Play) {
+                room->setPlayerMark(player, "damage_point_play_phase", 0);
                 room->addPlayerHistory(player, ".");
             }
             break;
@@ -299,8 +301,11 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
                 foreach (ServerPlayer *p, room->getAlivePlayers())
                     room->doNotify(p, QSanProtocol::S_COMMAND_NULLIFICATION_ASKED, QSanProtocol::Utils::toJsonString("."));
             }
-            if (use.card->isKindOf("Slash"))
-                use.from->tag.remove("Jink_" + use.card->toString());
+			if (use.card->isKindOf("Slash")) {
+				use.from->tag.remove("Jink_" + use.card->toString());
+				foreach(ServerPlayer *p, use.to.toSet())
+					p->removeQinggangTag(use.card);
+			}
 
             break;
         }
@@ -313,6 +318,7 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
             if (refilter)
                 room->filterCards(player, player->getCards("he"), triggerEvent == EventLoseSkill);
 
+            room->updateSkills();
             break;
         }
     case HpChanged: {
@@ -494,16 +500,16 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
     case CardEffected: {
             if (data.canConvert<CardEffectStruct>()) {
                 CardEffectStruct effect = data.value<CardEffectStruct>();
-                if (!effect.card->isKindOf("Slash") && effect.nullified) {
-                    LogMessage log;
-                    log.type = "#CardNullified";
-                    log.from = effect.to;
-                    log.arg = effect.card->objectName();
-                    room->sendLog(log);
+                if (effect.card->getTypeId() == Card::TypeTrick) {
+                    if (effect.nullified) {
+                        LogMessage log;
+                        log.type = "#CardNullified";
+                        log.from = effect.to;
+                        log.arg = effect.card->objectName();
+                        room->sendLog(log);
 
-                    return true;
-                } else if (effect.card->getTypeId() == Card::TypeTrick) {
-                    if (room->isCanceled(effect)) {
+                        return true;
+                    } else if (room->isCanceled(effect)) {
                         effect.to->setFlags("Global_NonSkillNullify");
                         return true;
                     } else {
@@ -1337,8 +1343,6 @@ bool HulaoPassMode::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer 
 
             Sanguosha->playHulaoPassBGM();
 
-            room->doLightbox("$StageChange", 5000);
-
             QList<const Card *> tricks = lord->getJudgingArea();
             if (!tricks.isEmpty()) {
                 DummyCard *dummy = new DummyCard;
@@ -1653,7 +1657,7 @@ bool BasaraMode::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *pl
                         log.arg2 = ces.card->objectName();
                         room->sendLog(log);
 
-                        room->broadcastSkillInvoke(prohibit->objectName());
+                        ces.to->broadcastSkillInvoke(prohibit->objectName());
                         room->notifySkillInvoked(ces.to, prohibit->objectName());
                     }
 

@@ -24,6 +24,7 @@ class Player : public QObject
     Q_PROPERTY(int hp READ getHp WRITE setHp)
     Q_PROPERTY(int maxhp READ getMaxHp WRITE setMaxHp)
     Q_PROPERTY(QString kingdom READ getKingdom WRITE setKingdom)
+    Q_PROPERTY(bool wounded READ isWounded STORED false)
     Q_PROPERTY(QString role READ getRole WRITE setRole)
     Q_PROPERTY(QString general READ getGeneralName WRITE setGeneralName)
     Q_PROPERTY(QString general2 READ getGeneral2Name WRITE setGeneral2Name)
@@ -38,7 +39,11 @@ class Player : public QObject
     Q_PROPERTY(bool owner READ isOwner WRITE setOwner)
     Q_PROPERTY(bool ready READ isReady WRITE setReady)
     Q_PROPERTY(bool role_shown READ hasShownRole WRITE setShownRole)
-    Q_PROPERTY(General::Gender gender READ getGender WRITE setGender)
+
+    Q_PROPERTY(bool kongcheng READ isKongcheng)
+    Q_PROPERTY(bool nude READ isNude)
+    Q_PROPERTY(bool all_nude READ isAllNude)
+
     Q_PROPERTY(bool careerist READ isCareerist WRITE setCareerist)
     Q_PROPERTY(bool kicked READ isKicked WRITE setKicked)
 
@@ -171,9 +176,11 @@ public:
     virtual void addSkill(const QString &skill_name);
     virtual void loseSkill(const QString &skill_name);
     bool hasSkill(const QString &skill_name, bool include_lose = false) const;
+	bool hasSkill(const Skill *skill, bool include_lose = false) const;
     bool hasSkills(const QString &skill_name, bool include_lose = false) const;
     bool hasInnateSkill(const QString &skill_name) const;
     bool hasLordSkill(const QString &skill_name, bool include_lose = false) const;
+	bool hasLordSkill(const Skill *skill, bool include_lose = false) const;
 
     virtual QString getGameMode() const = 0;
 
@@ -233,6 +240,7 @@ public:
     QString getPileName(int card_id) const;
     bool pileOpen(const QString &pile_name, const QString &player) const;
     void setPileOpen(const QString &pile_name, const QString &player);
+	QList<int> getHandPile() const;
 
     void addHistory(const QString &name, int times = 1);
     void clearHistory(const QString &name = QString());
@@ -309,7 +317,7 @@ private:
     bool face_up;
     bool chained;
     QList<int> judging_area;
-    QMultiHash<const Player *, int> fixed_distance;
+    QHash<const Player *, int> fixed_distance;
     QList<const Player *> attack_range_pair;
 
     QMap<Card::HandlingMethod, QStringList> card_limitation;

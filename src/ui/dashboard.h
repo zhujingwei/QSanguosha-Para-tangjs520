@@ -47,6 +47,8 @@ public:
     QSanSkillButton *removeSkillButton(const QString &skillName);
     QSanSkillButton *addSkillButton(const QString &skillName);
     void removeAllSkillButtons();
+    QSanInvokeSkillButton *getSkillButtonByName(const QString &skillName) const;
+    const QList<QSanInvokeSkillButton *>getAllSkillButtons() const;
 
     bool isAvatarUnderMouse();
 
@@ -91,6 +93,11 @@ public:
 
     void expandPileCards(const QString &pile_name);
     void retractPileCards(const QString &pile_name);
+	void retractAllSkillPileCards();
+    inline const QStringList &getPileExpanded() const
+    {
+        return _m_pile_expanded;
+    }
 
     void selectCard(CardItem *item, bool isSelected);
 
@@ -116,13 +123,10 @@ public:
     }
 
 public slots:
-    virtual void updateAvatar();
     void sortCards();
     void beginSorting();
-    void changeShefuState();
     void reverseSelection();
     void cancelNullification();
-    void setShefuState();
     void skillButtonActivated();
     void skillButtonDeactivated();
     void selectAll();
@@ -181,7 +185,6 @@ protected:
     QSanButton *m_btnReverseSelection;
     QSanButton *m_btnSortHandcard;
     QSanButton *m_btnNoNullification;
-    QSanButton *m_btnShefu;
     QGraphicsPixmapItem *_m_leftFrame, *_m_middleFrame, *_m_rightFrame;
     QGraphicsPixmapItem *button_widget;
 
@@ -227,7 +230,6 @@ protected:
     void setSelectedItem(CardItem *card_item);
 
     QMenu *_m_sort_menu;
-    QMenu *_m_shefu_menu;
     QMenu *_m_carditem_context_menu;
 
     //保存当前移进Dashboard可使用的卡牌
@@ -258,7 +260,6 @@ private slots:
 
     //增加双击手牌直接出牌的功能
     void onCardItemDoubleClicked();
-
     void onCardItemHover();
     void onCardItemLeaveHover();
     void onMarkChanged();

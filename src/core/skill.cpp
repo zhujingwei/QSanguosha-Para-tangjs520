@@ -30,26 +30,46 @@ Skill::Skill(const QString &name, Frequency frequency)
     }
 }
 
-QString Skill::getDescription() const
-{
+QString Skill::getDescription() const{
     bool normal_game = ServerInfo.DuringGame && isNormalGameMode(ServerInfo.GameMode);
     QString name = QString("%1%2").arg(objectName()).arg(normal_game ? "_p" : "");
+    QString skill_frequent;
+    if (ServerInfo.DuringGame) {
+        switch (getFrequency(Self)){
+        case Compulsory:
+            skill_frequent = "Compulsory";
+            break;
+        case Frequent:
+        case NotFrequent:
+            skill_frequent = "Frequent";
+            break;
+        case Wake:
+            skill_frequent = "Wake";
+            break;
+        case Limited:
+            skill_frequent = "Limited";
+            break;
+        }
+    }
+    name = QString("%1%2").arg(name).arg(skill_frequent);
+
     QString des_src = Sanguosha->translate(":" + name);
-    if (normal_game && des_src.startsWith(":"))
+    if (des_src.startsWith(":"))
+//     if (normal_game && des_src.startsWith(":"))
         des_src = Sanguosha->translate(":" + objectName());
     if (des_src.startsWith(":"))
         return QString();
     if (des_src.startsWith("[NoAutoRep]"))
         return des_src.mid(11);
 
-    if (Config.value("AutoSkillTypeColorReplacement", true).toBool()) {
-        QMap<QString, QColor> skilltype_color_map = Sanguosha->getSkillTypeColorMap();
-        foreach (QString skill_type, skilltype_color_map.keys()) {
-            QString type_name = Sanguosha->translate(skill_type);
-            QString color_name = skilltype_color_map[skill_type].name();
-            des_src.replace(type_name, QString("<font color=%1><b>%2</b></font>").arg(color_name).arg(type_name));
-        }
-    }
+//     if (Config.value("AutoSkillTypeColorReplacement", true).toBool()) {
+//         QMap<QString, QColor> skilltype_color_map = Sanguosha->getSkillTypeColorMap();
+//         foreach (QString skill_type, skilltype_color_map.keys()) {
+//             QString type_name = Sanguosha->translate(skill_type);
+//             QString color_name = skilltype_color_map[skill_type].name();
+//             des_src.replace(type_name, QString("<font color=%1><b>%2</b></font>").arg(color_name).arg(type_name));
+//         }
+//     }
     if (Config.value("AutoSuitReplacement", true).toBool()) {
         for (int i = 0; i <= 3; ++i) {
             Card::Suit suit = (Card::Suit)i;
@@ -82,37 +102,54 @@ int Skill::getEffectIndex(const ServerPlayer *, const Card *) const{
     return -1;
 }
 
-void Skill::initMediaSource() {
-    sources.clear();
-    for (int i = 1; ; ++i) {
-        QString effect_file = QString("audio/skill/%1%2.ogg").arg(objectName()).arg(QString::number(i));
-        if (QFile::exists(effect_file))
-            sources << effect_file;
-        else
-            break;
-    }
+void Skill::initMediaSource()
+{
+	sources.clear();
+	foreach(const General *general, Sanguosha->getAllGenerals()) {
+		if (general->hasSkill(this->objectName()) || general->hasRelatedSkill(this->objectName())) {
+			for (int i = 1;; i++) {
+				QString effect_file = QString("audio/general/%1/%2%3.ogg").arg(general->objectName()).arg(objectName()).arg(QString::number(i));
+				if (QFile::exists(effect_file))
+					sources << effect_file;
+				else
+					break;
+			}
 
-    if (sources.isEmpty()) {
-        QString effect_file = QString("audio/skill/%1.ogg").arg(objectName());
-        if (QFile::exists(effect_file))
-            sources << effect_file;
-    }
+			QString effect_file = QString("audio/general/%1/%2.ogg").arg(general->objectName()).arg(objectName());
+			if (QFile::exists(effect_file))
+				sources << effect_file;
+		}
+	}
+}
+
+Skill::Frequency Skill::getFrequency(const Player *) const
+{
+    if (frequency == NULL)
+        return NotFrequent;
+    return frequency;
 }
 
 QDialog *Skill::getDialog() const{
     return NULL;
 }
 
+bool Skill::shouldBeVisible(const Player * Self) const
+{
+    return Self != NULL;
+}
+
 ViewAsSkill::ViewAsSkill(const QString &name)
-    : Skill(name), response_or_use(false)
+    : Skill(name), response_pattern(QString()), response_or_use(false), expand_pile(QString())
 {
 }
 
 bool ViewAsSkill::isAvailable(const Player *invoker,
                               CardUseStruct::CardUseReason reason,
-                              const QString &pattern) const{
-    if (!invoker->hasSkill(objectName()) && !invoker->hasLordSkill(objectName())
-        && !invoker->hasFlag(objectName())) // For Shuangxiong
+                              const QString &pattern) const
+{
+    if (!invoker->hasSkill(this) && !invoker->hasLordSkill(this)
+        && invoker->getMark("ViewAsSkill_" + objectName() + "Effect") == 0   // For skills like Shuangxiong(ViewAsSkill effect remains even if the player has lost the skill)
+        && !invoker->hasFlag("RoomScene_" + objectName() + "TempUse")) // for RoomScene Temp Use
         return false;
     switch (reason) {
     case CardUseStruct::CARD_USE_REASON_PLAY: return isEnabledAtPlay(invoker);
@@ -174,9 +211,7 @@ OneCardViewAsSkill::OneCardViewAsSkill(const QString &name)
 }
 
 bool OneCardViewAsSkill::viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
-    return selected.isEmpty()
-        && (NULL != to_select && !to_select->hasFlag("using"))
-        && viewFilter(to_select);
+    return selected.isEmpty() && !to_select->hasFlag("using") && viewFilter(to_select);
 }
 
 bool OneCardViewAsSkill::viewFilter(const Card *to_select) const{
@@ -186,7 +221,13 @@ bool OneCardViewAsSkill::viewFilter(const Card *to_select) const{
             if (Self->isJilei(to_select)) return false;
             pat.chop(1);
         } else if (response_or_use && pat.contains("hand")) {
-            pat.replace("hand", "hand,wooden_ox");
+            QStringList handlist;
+            handlist.append("hand");
+            foreach (const QString &pile, Self->getPileNames()) {
+                if (pile.startsWith("&") || pile == "wooden_ox")
+                    handlist.append(pile);
+            }
+            pat.replace("hand", handlist.join(","));
         }
         ExpPattern pattern(pat);
         return pattern.match(Self, to_select);
@@ -212,6 +253,16 @@ TriggerSkill::TriggerSkill(const QString &name)
 {
 }
 
+const ViewAsSkill *TriggerSkill::getViewAsSkill() const
+{
+    return view_as_skill;
+}
+
+QList<TriggerEvent> TriggerSkill::getTriggerEvents() const
+{
+    return events;
+}
+
 int TriggerSkill::getPriority(TriggerEvent) const{
     return (frequency == Wake) ? 3 : 2;
 }
@@ -221,7 +272,7 @@ bool TriggerSkill::triggerable(const ServerPlayer *target, Room *) const{
 }
 
 bool TriggerSkill::triggerable(const ServerPlayer *target) const{
-    return target != NULL && (global || (target->isAlive() && target->hasSkill(objectName())));
+    return target != NULL && (global || (target->isAlive() && target->hasSkill(this)));
 }
 
 ScenarioRule::ScenarioRule(Scenario *scenario)
@@ -287,58 +338,23 @@ bool GameStartSkill::trigger(TriggerEvent, Room *, ServerPlayer *player, QVarian
     return false;
 }
 
-SPConvertSkill::SPConvertSkill(const QString &from, const QString &to)
-    : GameStartSkill(QString("cv_%1").arg(from)), from(from), to(to)
+RetrialSkill::RetrialSkill(const QString &name, bool exchange /* = false */)
+    : TriggerSkill(name)
 {
-    to_list = to.split("+");
+    events << AskForRetrial;
+    this->exchange = exchange;
 }
 
-bool SPConvertSkill::triggerable(const ServerPlayer *target) const{
-    if (target == NULL) return false;
-    if (!Config.value("EnableSPConvert", true).toBool()) return false;
-    if (Config.EnableHegemony) return false;
-    if (!isNormalGameMode(Config.GameMode)) return false;
-    bool available = false;
-    foreach (QString to_gen, to_list) {
-        const General *gen = Sanguosha->getGeneral(to_gen);
-        if (gen && !Config.value("Banlist/Roles", "").toStringList().contains(to_gen)
-            && !Sanguosha->getBanPackages().contains(gen->getPackage())) {
-            available = true;
-            break;
-        }
-    }
-    return GameStartSkill::triggerable(target)
-           && (target->getGeneralName() == from || target->getGeneral2Name() == from) && available;
-}
+bool RetrialSkill::trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+{
+    JudgeStruct *judge = data.value<JudgeStruct *>();
+    const Card *retrial_card = onRetrial(player, judge);
+    if (retrial_card == NULL)
+        return false;
 
-void SPConvertSkill::onGameStart(ServerPlayer *player) const{
-    Room *room = player->getRoom();
-    QStringList choicelist;
-    foreach (QString to_gen, to_list) {
-        const General *gen = Sanguosha->getGeneral(to_gen);
-        if (gen && !Config.value("Banlist/Roles", "").toStringList().contains(to_gen)
-            && !Sanguosha->getBanPackages().contains(gen->getPackage()))
-            choicelist << to_gen;
-    }
-    QString data = choicelist.join("\\,\\");
-    if (choicelist.length() >= 2)
-        data.replace("\\,\\" + choicelist.last(), "\\or\\" + choicelist.last());
-    if (player->askForSkillInvoke(objectName(), data)) {
-        QString to_cv;
-        AI *ai = player->getAI();
-        if (ai)
-            to_cv = room->askForChoice(player, objectName(), choicelist.join("+"));
-        else
-            to_cv = choicelist.length() == 1 ? choicelist.first() : room->askForGeneral(player, choicelist.join("+"));
-        bool isSecondaryHero = (player->getGeneralName() != from && player->getGeneral2Name() == from);
+    room->retrial(retrial_card, player, judge, objectName(), exchange);
 
-        room->changeHero(player, to_cv, true, false, isSecondaryHero);
-
-        const General *general = Sanguosha->getGeneral(to_cv);
-        const QString kingdom = general->getKingdom();
-        if (!isSecondaryHero && kingdom != "god" && kingdom != player->getKingdom())
-            room->setPlayerProperty(player, "kingdom", kingdom);
-    }
+    return false;
 }
 
 ProhibitSkill::ProhibitSkill(const QString &name)

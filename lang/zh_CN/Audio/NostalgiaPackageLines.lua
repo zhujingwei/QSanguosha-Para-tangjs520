@@ -1,99 +1,215 @@
 -- lines for Nostalgia Package
 
 return {
+	-- 旧 曹操
+	["$nos_caocaonosjianxiong1"] = "宁教我负天下人，休教天下人负我",
+	["$nos_caocaonosjianxiong2"] = "吾好梦中杀人",
+	["$nos_caocaohujia1"] = "魏将何在",
+	["$nos_caocaohujia2"] = "来人，护驾",
+	["~nos_caocao"] = "霸业未成，未成啊",
+
+	-- 旧 司马懿
+	["$nos_simayinosguicai1"] = "天命？哈哈哈哈",
+	["$nos_simayinosguicai2"] = "吾乃天命之子",
+	["$nos_simayinosfankui1"] = "下次注意点",
+	["$nos_simayinosfankui2"] = "出来混，早晚要还的",
+	["~nos_simayi"] = "难道真是天命难违",
+
+
+	-- 夏侯惇
+	["$nos_xiahoudunnosganglie1"] = "鼠辈，竟敢伤我",
+	["$nos_xiahoudunnosganglie2"] = "以彼之道，还施彼身",
+	["~nos_xiahoudun"] = "两，两边都看不见了",
+
 	-- 旧 张辽
-	["$nostuxi1"] = "哼，没想到吧！",
-	["$nostuxi2"] = "拿来吧！",
+	["$nos_zhangliaonostuxi1"] = "哼，没想到吧",
+	["$nos_zhangliaonostuxi2"] = "拿来吧",
+	["~nos_zhangliao"] = "真的没想到",
+
+	-- 旧 许褚
+	["$nos_xuchunosluoyi1"] = "脱",
+	["$nos_xuchunosluoyi2"] = "谁来与我大战三百回合",
+	["~nos_xuchu"] = "冷，好冷啊",
+
+	-- 郭嘉
+	["$nos_guojiatiandu1"] = "就这样吧",
+	["$nos_guojiatiandu2"] = "哦",
+	["$nos_guojianosyiji1"] = "也好",
+	["$nos_guojianosyiji2"] = "罢了",
+	["~nos_guojia"] = "咳，咳",
+	
+	-- 旧刘备
+	["$nos_liubeinosrende1"] = "以德服人",
+	["$nos_liubeinosrende2"] = "惟贤惟德，能服于人",
+	["$nos_liubeijijiang1"] = "蜀将何在",
+	["$nos_liubeijijiang2"] = "尔等敢应战否",
+	["~nos_liubei"] = "这就是桃园吗",
+
+	-- 旧 关羽
+	["$nos_guanyuwusheng1"] = "关羽在此，尔等受死",
+	["$nos_guanyuwusheng2"] = "看尔乃插标卖首",
+	["~nos_guanyu"] = "什么？此地名叫麦城",
+
+	-- 旧 张飞
+	["$nos_zhangfeipaoxiao1"] = "啊",
+	["$nos_zhangfeipaoxiao2"] = "燕人张飞在此",
+	["~nos_zhangfei"] = "实在是杀不动了",
+
+	-- 旧 赵云
+	["$nos_zhaoyunlongdan1"] = "能进能退，乃真正法器",
+	["$nos_zhaoyunlongdan2"] = "吾乃，常山赵子龙也",
+	["~nos_zhaoyun"] = "这，就是失败的滋味儿吗",
+
+	-- 旧 马超
+	["$nos_machaonostieji1"] = "全军突击",
+	["$nos_machaonostieji2"] = "（枪声，马叫声）",
+	["~nos_machao"] = "（马蹄声……）",
+	
+	-- 旧黄月英
+	["$nos_huangyueyingnosjizhi1"] = "哼哼",
+	["$nos_huangyueyingnosjizhi2"] = "哼嗯",
+	["~nos_huangyueying"] = "亮",
+
+	-- 旧 甘宁
+	["$nos_ganningqixi1"] = "接招吧",
+	["$nos_ganningqixi2"] = "你的牌太多了",
+	["~nos_ganning"] = "二十年后，又是一条好汉",
+
+	-- 旧 吕蒙
+	["$nos_lvmengkeji1"] = "不是不报，时候未到",
+	["$nos_lvmengkeji2"] = "留得青山在，不怕没柴烧",
+	["~nos_lvmeng"] = "被看穿了吗",
+
+	-- 旧 黄盖
+	["$nos_huanggainoskurou1"] = "请鞭笞我吧 ，公瑾",
+	["$nos_huanggainoskurou2"] = "赴汤蹈火，在所不辞",
+	["~nos_huanggai"] = "失血过多了",
+
+	-- 旧 周瑜
+	["$nos_zhouyunosyingzi1"] = "哈哈哈哈",
+	["$nos_zhouyunosyingzi2"] = "汝等看好了",
+	["$nos_zhouyunosfanjian1"] = "挣扎吧，在血和暗的深渊里",
+	["$nos_zhouyunosfanjian2"] = "痛苦吧，在仇与恨的地狱中",
+	["~nos_zhouyu"] = "既生瑜，何生",
+
+	-- 旧 大乔
+	["$nos_daqiaonosguose1"] = "请休息吧",
+	["$nos_daqiaonosguose2"] = "你累了",
+	["$nos_daqiaoliuli1"] = "交给你了",
+	["$nos_daqiaoliuli2"] = "你来嘛",
+	["~nos_daqiao"] = "伯符，我去了",
+
+	-- 陆逊
+	["$nos_luxunnosqianxun1"] = "儒生脱尘，不为贪逸淫乐之事",
+	["$nos_luxunnosqianxun2"] = "谦谦君子，不饮盗泉之水",
+	["$nos_luxunnoslianying1"] = "牌不是万能的，但是没牌是万万不能的",
+	["$nos_luxunnoslianying2"] = "旧的不去，新的不来",
+	["~nos_luxun"] = "我还是太年轻了",
+
+	-- 旧 华佗
+	["$nos_huatuojijiu1"] = "别紧张，有老夫呢",
+	["$nos_huatuojijiu2"] = "救人一命，胜造七级浮屠",
+	["$nos_huatuoqingnang1"] = "早睡早起，方能养生",
+	["$nos_huatuoqingnang2"] = "越老越要补啊",
+	["~nos_huatuo"] = "医者…不能自医啊",
+
+	-- 旧 吕布
+	["$nos_lvbuwushuang1"] = "谁能挡我",
+	["$nos_lvbuwushuang2"] = "神挡杀神，佛挡杀佛",
+	["~nos_lvbu"] = "不可能",
+	
+	-- 旧貂蝉
+	["$nos_diaochanbiyue1"] = "失礼了",
+	["$nos_diaochanbiyue2"] = "羡慕吧",
+	["$nos_diaochannoslijian1"] = "嗯哼哼~~嗯哼",
+	["$nos_diaochannoslijian2"] = "夫君，你要替妾身做主啊",
+	["~nos_diaochan"] = "父亲大人，对不起",
+
+	-- 旧 曹仁
+	["$nos_caorennosjushou1"] = "我先休息一会儿",
+	["$nos_caorennosjushou2"] = "尽管来吧",
+	["~nos_caoren"] = "实在是守不住了",
 
 	-- 旧 周泰
-	["$nosbuqu1"] = "我绝不会倒下！",
-	["$nosbuqu2"] = "还不够！",
-	["~nos_zhoutai"] = "已经尽力了……",
+	["$nos_zhoutainosbuqu1"] = "我绝不会倒下",
+	["$nos_zhoutainosbuqu2"] = "还不够",
+	["~nos_zhoutai"] = "已经尽力了",
 
 	-- 旧 张角
-	["$nosleiji1"] = "雷公助我！",
-	["$nosleiji2"] = "以我之真气，合天地之造化。",
-	["$guidao3"] = "哼哼哼哼……",
-	["$guidao4"] = "天下大势，为我所控！",
-	["$huangtian3"] = "苍天已死，黄天当立！",
-	["$huangtian4"] = "岁在甲子，天下大吉！",
-	["~nos_zhangjiao"] = "黄天…也死了……",
+	["$nos_zhangjiaonosleiji1"] = "雷公助我",
+	["$nos_zhangjiaonosleiji2"] = "以我之真气，合天地之造化",
+	["$nos_zhangjiaoguidao1"] = "哼哼哼哼",
+	["$nos_zhangjiaoguidao2"] = "天下大势，为我所控",
+	["$nos_zhangjiaohuangtian1"] = "苍天已死，黄天当立",
+	["$nos_zhangjiaohuangtian2"] = "岁在甲子，天下大吉",
+	["~nos_zhangjiao"] = "黄天…也死了",
 
 	-- 旧 于吉
-	["$nosguhuo1"] = "你信吗？",
-	["$nosguhuo2"] = "猜猜看哪？",
-	["~nos_yuji"] = "竟然…被猜到了……",
+	["$nos_yujinosguhuo1"] = "你信吗",
+	["$nos_yujinosguhuo2"] = "猜猜看哪",
+	["~nos_yuji"] = "竟然…被猜到了",
 
 	-- 旧 法正
 	["cv:nos_fazheng"] = "苏遥东，官方",
-	["$nosenyuan1"] = "得人恩果千年记。",
-	["$nosenyuan2"] = "滴水之恩，涌泉以报。",
-	["$nosenyuan3"] = "谁敢得罪我！",
-	["$nosenyuan4"] = "睚眦之怨，无不报复。",
-	["$nosxuanhuo1"] = "重用许靖，以眩远近。",
-	["$nosxuanhuo2"] = "给你的，十倍奉还给我！",
-	["~nos_fazheng"] = "辅翼既折，蜀汉衰矣……",
-
-	-- 旧 凌统
-	["cv:nos_lingtong"] = "官方",
-	["$nosxuanfeng1"] = "伤敌于千里之外！",
-	["$nosxuanfeng2"] = "索命于须臾之间！",
+	["$nos_fazhengnosenyuan1"] = "得人恩果千年记",
+	["$nos_fazhengnosenyuan2"] = "滴水之恩，涌泉以报",
+	["$nos_fazhengnosenyuan3"] = "谁敢得罪我",
+	["$nos_fazhengnosenyuan4"] = "睚眦之怨，无不报复",
+	["$nos_fazhengnosxuanhuo1"] = "重用许靖，以眩远近",
+	["$nos_fazhengnosxuanhuo2"] = "给你的，十倍奉还给我",
+	["~nos_fazheng"] = "蜀翼既折，蜀汉衰矣",
 
 	-- 旧 徐庶
-	["$noswuyan1"] = "唉，一切尽在不言中。",
-	["$noswuyan2"] = "嘘，言多必失啊。",
-	["$nosjujian1"] = "我看好你！",
-	["$nosjujian2"] = "将军岂愿抓牌乎？",
-	["~nos_xushu"] = "娘，孩儿不孝，向您…请罪……",
+	["$nos_xushunoswuyan1"] = "唉，一切尽在不言中",
+	["$nos_xushunoswuyan2"] = "嘘，言多必失啊",
+	["$nos_xushunosjujian1"] = "我看好你",
+	["$nos_xushunosjujian2"] = "将军岂愿抓牌乎",
+	["~nos_xushu"] = "娘，孩儿不孝，向您…请罪",
+	
+	-- 旧 张春华
+	["$nos_zhangchunhuanosshangshi1"] = "无情者伤人，有情者自伤",
+	["$nos_zhangchunhuanosshangshi2"] = "自损八百，可伤敌一千",
+	["$nos_zhangchunhuajueqing1"] = "你的死活与我何干",
+	["$nos_zhangchunhuajueqing2"] = "无来无去，不悔不怨",
+	["~nos_zhangchunhua"] = "怎能如此对我",
 
 	-- 旧 关兴张苞
-	["cv:nos_guanxingzhangbao"] = "喵小林，风叹息",
-	["$nosfuhun1"] = "吾父武名，声震海内！",
-	["$nosfuhun2"] = "父魂佑我！",
-	["$nosfuhun3"] = "父辈功勋，望尘莫及……",
-	["~nos_guanxingzhangbao"] = "东吴未灭，父仇未报，可恨，可恨！",
-
-	-- 旧 韩当
-	["cv:nos_handang"] = "风叹息",
-	["$nosgongqi"] = "弓马齐备，远射近突！",
-	["$nosjiefan1"] = "解烦军至，此危自解！",
-	["$nosjiefan2"] = "吾主莫慌，韩义公在此！",
-	["~nos_handang"] = "我主堪忧，我主堪忧啊……",
+	["$nos_guanxingzhangbaonosfuhun1"] = "呐喊破敌，锐不可挡",
+	["$nos_guanxingzhangbaonosfuhun2"] = "匹夫之勇，插标卖首",
+	["~nos_guanxingzhangbao"] = "父亲，我来了",
 
 	-- 旧 马岱
-	["cv:nos_madai"] = "风叹息",
-	["$nosqianxi1"] = "（拔剑声）",
-	["$nosqianxi2"] = "我敢杀你！",
-	["$nosqianxi3"] = "竟然有防备？只能力战搏杀之！", -- 判定失败
+	["$nos_madainosqianxi1"] = "斩草除根，除恶务尽",
+	["$nos_madainosqianxi2"] = "伤敌十指，不如断敌一指",
+	["~nos_madai"] = "反骨贼已除，丞相放心",
 
 	-- 旧 王异
-	["cv:nos_wangyi"] = "蒲小猫",
-	["$noszhenlie1"] = "雪君父之大耻，虽丧身亦不惜。", -- 回合外
-	["$noszhenlie2"] = "顾子而不行，不如先死矣。", -- 回合内
-	["$nosmiji1"] = "有此九奇，可逐羌敌。",
-	["$nosmiji2"] = "屯兵逐超，得保冀城。", -- 自己
-	["$nosmiji3"] = "救兵已到，乃解城围。", -- 他人
-	["$nosmiji4"] = "暂与汝和，仇必后报！", -- 马超
+	["$nos_wangyinoszhenlie1"] = "我，绝不屈服",
+	["$nos_wangyinoszhenlie2"] = "休要小看妇人志气",
+	["$nos_wangyinosmiji1"] = "奇谋，只在绝境中诞生",
+	["$nos_wangyinosmiji2"] = "我将尽我所能",
+	["~nos_wangyi"] = "忠义已尽，死又何妨",
+	
+	-- 旧曹冲
+	["$nos_caochongnoschengxiang1"] = "依我看，小事一桩",
+	["$nos_caochongnoschengxiang2"] = "孰重孰轻，一称便知",
+	["$nos_caochongnosrenxin1"] = "仁者爱人，人恒爱之",
+	["$nos_caochongnosrenxin2"] = "有我在，别怕",
+	["~nos_caochong"] = "子桓哥哥",
 
-	-- 内测 钟会
-	["cv:nos_zhonghui"] = "极光星逝",
-	["$noszhenggong"] = "伐逆之任，何不予吾？",
-	["$nosquanji1"] = "将军请留步。", -- 发动拼点
-	["$nosquanji2"] = "将军劳苦功高，宜当暂歇。", -- 赢
-	["$nosquanji3"] = "汝执意如此，莫要后悔。", -- 没赢
-	["$nosbaijiang"] = "请兵拜将，领兵伐逆；破蜀之日，功成之时！",
-	["$nosyexin1"] = "吾今功高，主必忌之！", -- 受到伤害
-	["$nosyexin2"] = "主畏吾谋，不可不寻后路！", -- 交换牌
-	["$noszili"] = "大权在握，功高振军；自立蜀中，以图天下！",
-	["$nospaiyi1"] = "若不成，退居蜀中，亦可为王！", -- 置于自己的区域
-	["$nospaiyi2"] = "若事成，会师洛阳，天下可定！", -- 置于其他角色的区域并摸牌
-	["~nos_zhonghui"] = "天之亡吾，争有何用……",
+	-- 旧伏皇后
+	["$nos_fuhuanghounosqiuyuan1"] = "逆贼逞凶，卿可灭之",
+	["$nos_fuhuanghounosqiuyuan2"] = "求父亲救救大汉江山吧",
+	["$nos_fuhuanghounoszhuikong1"] = "诚惶诚恐，夜不能寐",
+	["$nos_fuhuanghounoszhuikong2"] = "嘘，隔墙有耳",
+	["~nos_fuhuanghou"] = "陛下为何不救臣妾", 
 
-	-- 内测 神曹操
-	["cv:nos_shencaocao"] = "极光星逝",
-	["$nosguixin1"] = "青青子衿，悠悠我心。", -- 更改势力
-	["$nosguixin2"] = "威服诸侯，师之所尊。", -- 更改势力
-	["$nosguixin3"] = "日月之行，若出其中。", -- 获得主公技
-	["$nosguixin4"] = "星汉灿烂，若出其里。", -- 获得主公技
-	["~nos_shencaocao"] = "月明星稀，乌鹊南飞，绕树三匝，无枝可依。",
+    -- 旧李儒
+	["$nos_lirunosjuece1"] = "哼，你走投无路了",
+	["$nos_lirunosjuece2"] = "无用之人，死",
+	["$nos_lirunosmieji1"] = "宁错杀，毋放过",
+	["$nos_lirunosmieji2"] = "你，能逃得出我的手掌心吗",
+	["$nos_lirunosfencheng1"] = "我得不到的，你们也别想得到",
+	["$nos_lirunosfencheng2"] = "让这一切都灰飞烟灭吧，哼哼哼哼",
+	["~nos_liru"] = "如遇明主大业必成",
 }

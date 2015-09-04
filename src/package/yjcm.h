@@ -79,8 +79,29 @@ class PaiyiCard: public SkillCard {
 public:
     Q_INVOKABLE PaiyiCard();
 
-    virtual bool targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const;
-    virtual void onEffect(const CardEffectStruct &effect) const;
+    bool targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const;
+    void onEffect(const CardEffectStruct &effect) const;
+};
+
+class SanyaoCard : public SkillCard
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE SanyaoCard();
+
+    bool targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const;
+    void onEffect(const CardEffectStruct &effect) const;
+};
+
+class JieyueCard : public SkillCard
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE JieyueCard();
+
+    void onEffect(const CardEffectStruct &effect) const;
 };
 
 #endif

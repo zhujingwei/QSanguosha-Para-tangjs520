@@ -8,7 +8,7 @@ return {
 	["designer:xunyou"] = "淬毒",
 	["illustrator:xunyou"] = "魔鬼鱼",
 	["qice"] = "奇策",
-	[":qice"] = "阶段技。你可以将你的所有手牌（至少一张）当任意一张非延时锦囊牌使用。",
+	[":qice"] = "<font color=\"green\"><b>出牌阶段限一次</b></font>，你可以将你的所有手牌（至少一张）当任意一张非延时锦囊牌使用。",
 	["zhiyu"] = "智愚",
 	[":zhiyu"] = "每当你受到伤害后，你可以摸一张牌：若如此做，你展示所有手牌。若你的手牌均为同一颜色，伤害来源弃置一张手牌。",
 
@@ -47,9 +47,9 @@ return {
 	["designer:liaohua"] = "桃花僧",
 	["illustrator:liaohua"] = "天空之城",
 	["dangxian"] = "当先",
-	[":dangxian"] = "锁定技。回合开始时，你执行一个额外的出牌阶段。",
+	[":dangxian"] = "<font color=\"blue\"><b>锁定技</b></font>，回合开始时，你执行一个额外的出牌阶段。",
 	["fuli"] = "伏枥",
-	[":fuli"] = "限定技。每当你处于濒死状态时，你可以将回复至X点体力，然后将武将牌翻面。（X为现存势力数）",
+	[":fuli"] = "<font color=\"red\"><b>限定技</b></font>，每当你处于濒死状态时，你可以将回复至X点体力，然后将武将牌翻面。（X为现存势力数）",
 	["$FuliAnimate"] = "image=image/animate/fuli.png",
 
 	["#guanxingzhangbao"] = "将门虎子",
@@ -76,7 +76,7 @@ return {
 	["designer:bulianshi"] = "Anais",
 	["illustrator:bulianshi"] = "勺子妞",
 	["anxu"] = "安恤",
-	[":anxu"] = "阶段技。你可以选择手牌数不等的两名其他角色：若如此做，手牌较少的角色正面朝上获得另一名角色的一张手牌。若此牌不为黑桃，你摸一张牌。",
+	[":anxu"] = "<font color=\"green\"><b>出牌阶段限一次</b></font>，你可以选择手牌数不等的两名其他角色：若如此做，手牌较少的角色正面朝上获得另一名角色的一张手牌。若此牌不为黑桃，你摸一张牌。",
 	["zhuiyi"] = "追忆",
 	[":zhuiyi"] = "你死亡时，你可以令一名其他角色（除杀死你的角色）摸三张牌并回复1点体力。",
 	["zhuiyi-invoke"] = "你可以发动“追忆”<br/> <b>操作提示</b>: 选择一名其他角色→点击确定<br/>",
@@ -86,10 +86,10 @@ return {
 	["handang"] = "韩当",
 	["illustrator:handang"] = "DH",
 	["gongqi"] = "弓骑",
-	[":gongqi"] = "阶段技。你可以弃置一张牌：若如此做，本回合你的攻击范围无限；若此牌为装备牌，你可以弃置一名其他角色的一张牌。",
+	[":gongqi"] = "<font color=\"green\"><b>出牌阶段限一次</b></font>，你可以弃置一张牌：若如此做，本回合你的攻击范围无限；若此牌为装备牌，你可以弃置一名其他角色的一张牌。",
 	["@gongqi-discard"] = "你可以弃置一名其他角色的一张牌",
 	["jiefan"] = "解烦",
-	[":jiefan"] = "限定技。出牌阶段，你可以选择一名角色，然后攻击范围内包含该角色的所有角色选择一项：弃置一张武器牌，或令该角色摸一张牌。",
+	[":jiefan"] = "<font color=\"red\"><b>限定技</b></font>，出牌阶段，你可以选择一名角色，然后攻击范围内包含该角色的所有角色选择一项：弃置一张武器牌，或令该角色摸一张牌。",
 	["@jiefan-discard"] = "请弃置一张武器牌，否则 %dest 摸一张牌",
 	["$JiefanAnimate"] = "image=image/animate/jiefan.png",
 
@@ -100,7 +100,7 @@ return {
 	["zishou"] = "自守",
 	[":zishou"] = "摸牌阶段，若你已受伤，你可以额外摸X张牌，然后跳过出牌阶段。（X为你已损失的体力值）",
 	["zongshi"] = "宗室",
-	[":zongshi"] = "锁定技。你的手牌上限+X。（X为现存势力数）",
+	[":zongshi"] = "<font color=\"blue\"><b>锁定技</b></font>，你的手牌上限+X。（X为现存势力数）",
 
 	["#huaxiong"] = "魔将",
 	["huaxiong"] = "YJ华雄",
@@ -108,5 +108,12 @@ return {
 	["designer:huaxiong"] = "小立",
 	["illustrator:huaxiong"] = "地狱许",
 	["shiyong"] = "恃勇",
-	[":shiyong"] = "锁定技。每当你受到一次红色【杀】或【酒】【杀】的伤害后，你失去1点体力上限。",
+	[":shiyong"] = "<font color=\"blue\"><b>锁定技</b></font>，每当你受到一次红色【杀】或【酒】【杀】的伤害后，你失去1点体力上限。",
+	
+	["#new_liubiao"] = "跨蹈汉南",
+	["new_liubiao"] = "新·刘表",
+	["&new_liubiao"] = "刘表",
+	["newzishou"] = "自守",
+	[":newzishou"] = "摸牌阶段摸牌时，你可以额外摸X张牌（X为现存势力数）。若如此做，你于本回合出牌阶段内使用的牌不能指定其他角色为目标。",
+
 }

@@ -32,7 +32,7 @@ public:
     void drawCard(const Card *card);
     Room *getRoom() const;
     void broadcastSkillInvoke(const Card *card) const;
-    void broadcastSkillInvoke(const QString &card_name) const;
+	void broadcastSkillInvoke(const QString &skill_name, int type = -1, int start = 1) const;
     int getRandomHandCardId() const;
     const Card *getRandomHandCard() const;
     void obtainCard(const Card *card, bool unhide = true, int obtainReason = CardMoveReason::S_REASON_GOTCARD);
@@ -46,6 +46,7 @@ public:
     void clearPrivatePiles();
     void drawCards(int n, const QString &reason = QString());
     bool askForSkillInvoke(const QString &skill_name, const QVariant &data = QVariant());
+	bool askForSkillInvoke(const Skill *skill, const QVariant &data = QVariant());
     QList<int> forceToDiscard(int discard_num, bool include_equip, bool is_discard = true, const QString &pattern = ".");
     QList<int> handCards() const;
     virtual QList<const Card *> getHandcards() const;
@@ -86,6 +87,9 @@ public:
     void addVictim(ServerPlayer *victim);
     QList<ServerPlayer *> getVictims() const;
 
+    void startRecord();
+    void saveRecord(const QString &filename);
+
     void setNext(ServerPlayer *next);
     ServerPlayer *getNext() const;
     ServerPlayer *getNextAlive(int n = 1) const;
@@ -103,14 +107,10 @@ public:
     void introduceTo(ServerPlayer *player);
     void marshal(ServerPlayer *player) const;
 
-    void addToPile(const QString &pile_name, const Card *card, bool open = true,
-        const QList<ServerPlayer *> &open_players = QList<ServerPlayer *>());
-    void addToPile(const QString &pile_name, int card_id, bool open = true,
-        const QList<ServerPlayer *> &open_players = QList<ServerPlayer *>());
-    void addToPile(const QString &pile_name, const QList<int> &card_ids, bool open = true,
-        const QList<ServerPlayer *> &open_players = QList<ServerPlayer *>());
-    void addToPile(const QString &pile_name, const QList<int> &card_ids, bool open,
-        const QList<ServerPlayer *> &open_players, const CardMoveReason &reason);
+    void addToPile(const QString &pile_name, const Card *card, bool open = true, QList<ServerPlayer *> open_players = QList<ServerPlayer *>());
+    void addToPile(const QString &pile_name, int card_id, bool open = true, QList<ServerPlayer *> open_players = QList<ServerPlayer *>());
+    void addToPile(const QString &pile_name, QList<int> card_ids, bool open = true, QList<ServerPlayer *> open_players = QList<ServerPlayer *>());
+    void addToPile(const QString &pile_name, QList<int> card_ids, bool open, QList<ServerPlayer *> open_players, CardMoveReason reason);
 
     void exchangeFreelyFromPrivatePile(const QString &skill_name, const QString &pile_name, int upperlimit = 1000, bool include_equip = false);
     void gainAnExtraTurn();
@@ -162,6 +162,7 @@ private:
     AI *ai;
     AI *trust_ai;
     QList<ServerPlayer *> victims;
+    Recorder *recorder;
     QList<Phase> phases;
     int _m_phases_index;
     QList<PhaseStruct> _m_phases_state;

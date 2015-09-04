@@ -240,14 +240,14 @@ public:
 
     void notifySkillInvoked(const ServerPlayer *player, const QString &skill_name);
     void broadcastSkillInvoke(const QString &skillName);
-    void broadcastSkillInvoke(const QString &skillName, const QString &category);
+	void broadcastSkillInvoke(const QString &skillName, const QString &category, int type = -1);
     void broadcastSkillInvoke(const QString &skillName, int type);
     void broadcastSkillInvoke(const QString &skillName, bool isMale, int type);
     void doLightbox(const QString &lightboxName, int duration = 2000, int pixelSize = 0);
     void doLightbox(const QList<ServerPlayer *> &winPlayers, const QString &winLightboxName,
         const QList<ServerPlayer *> &losePlayers, const QString &loseLightboxName,
         int duration = 2000, int pixelSize = 0);
-
+	void doSuperLightbox(const QString &heroName, const QString &skillName);
     void doAnimate(QSanProtocol::AnimateType type, const QString &arg1 = QString(),
         const QString &arg2 = QString(),
         const QList<ServerPlayer *> &players = QList<ServerPlayer *>());
@@ -283,7 +283,7 @@ public:
     void swapSeat(ServerPlayer *a, ServerPlayer *b);
     lua_State *getLuaState() const;
     void setFixedDistance(Player *from, const Player *to, int distance);
-    void removeFixedDistance(Player *from, const Player *to, int distance);
+    void removeFixedDistance(Player * from, const Player * to, int distance);
     void insertAttackRangePair(Player *from, const Player *to);
     void removeAttackRangePair(Player *from, const Player *to);
     void reverseFor3v3(const Card *card, ServerPlayer *player, QList<ServerPlayer *> &list);
@@ -395,6 +395,8 @@ public:
 
     void broadcastPhaseEffect(TriggerEvent triggerEvent, const QVariant &data = QVariant());
     bool kickPlayerCommand(ServerPlayer *, const Json::Value &arg);
+
+    void updateSkills();
 
 protected:
     virtual void run();

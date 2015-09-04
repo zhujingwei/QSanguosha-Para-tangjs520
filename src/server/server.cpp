@@ -1425,20 +1425,13 @@ void Server::processNewConnection(ClientSocket *socket) {
 
     if (Config.ForbidSIMC) {
         QString addr = socket->peerAddress();
-        QMultiHash<QString, ClientSocket *>::iterator i = addresses.find(addr);
-        if (i != addresses.end()) {
-            while (i != addresses.end() && i.key() == addr) {
-                i.value()->send("");
-                ++i;
-            }
-
-            addresses.insert(addr, socket);
+        if (addresses.contains(addr)) {
+            addresses.append(addr);
             socket->disconnectFromHost();
             emit server_message(tr("Forbid the connection of address %1").arg(addr));
             return;
-        }
-        else {
-            addresses.insert(addr, socket);
+        } else {
+            addresses.append(addr);
         }
     }
 
@@ -1501,7 +1494,7 @@ void Server::cleanup() {
     ClientSocket *socket = qobject_cast<ClientSocket *>(sender());
 
     if (Config.ForbidSIMC) {
-        addresses.remove(socket->peerAddress(), socket);
+        addresses.removeOne(socket->peerAddress());
     }
 
     socket->deleteLater();

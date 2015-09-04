@@ -2,78 +2,76 @@
 
 return {
 	-- 步练师
-	["cv:bulianshi"] = "蒲小猫",
-	["$anxu1"] = "弥缝事体，安恤人言。",
-	["$anxu2"] = "夫君，朝事当量之，不可轻率。", -- 孙权
-	["$zhuiyi1"] = "此情常在，追思不忘。",
-	["$zhuiyi2"] = "吾若有灵，常待君侧。", -- 孙权
-	["~bulianshi"] = "陛下，今生情未了，来世再侍君。",
+	["$bulianshianxu1"] = "和鸾雍雍，万福攸同",
+	["$bulianshianxu2"] = "君子乐胥，万邦之屏",
+	["$bulianshizhuiyi1"] = "终其永怀，恋心殷殷",
+	["$bulianshizhuiyi2"] = "妾心所系，如月之恒",
+	["~bulianshi"] = "江之永矣，不可方思",
 
 	-- 曹彰
-	["$jiangchi1"] = "谨遵父训，不可逞匹夫之勇。", --额外摸一张牌
-	["$jiangchi2"] = "吾定当身先士卒，振魏武雄风！", --少摸一张牌
-	["~caozhang"] = "子桓，你害我！",
+	["$caozhangjiangchi1"] = "谨遵父训，不可逞匹夫之勇",
+	["$caozhangjiangchi2"] = "我定当身先士卒，振魏武雄风",
+	["~caozhang"] = "子桓，你害我",
 
 	-- 程普
-	["cv:chengpu"] = "风叹息",
-	["$lihuo1"] = "叛者何辜，投尸火焚！",
-	["$lihuo2"] = "疠气侵身，呃……",
-	["$chunlao1"] = "美酒当藏之，来日与众享。",
-	["$chunlao2"] = "吾有美酒，与众饮之。",
-	["$chunlao3"] = "与公瑾相交，不饮自醉。",
-	["~chengpu"] = "不曾枉杀人，为何折我寿。",
+	["$chengpulihuo1"] = "将士们，引火对敌",
+	["$chengpulihuo2"] = "和我同归于尽吧",
+	["$chengpuchunlao1"] = "唉，帐中不可无酒啊",
+	["$chengpuchunlao2"] = "无碍，且饮一杯",
+	["~chengpu"] = "没，没有酒了",
 
 	-- 关兴张苞
-	["$fuhun1"] = "匹夫之勇，插标卖首！", -- 使用【杀】
-	["$fuhun2"] = "呐喊破敌，锐不可当！", -- 获得技能
-	["~guanxingzhangbao"] = "父亲，我来了！",
+	["$guanxingzhangbaofuhun1"] = "将门虎子，承我父志",
+	["$guanxingzhangbaofuhun2"] = "光复汉室，重任在肩",
+	["$guanxingzhangbaowusheng"] = "一夫当关，万夫莫当",
+	["$guanxingzhangbaopaoxiao"] = "喝",
+	["~guanxingzhangbao"] = "未能手刃仇敌，愧对先父",
 
 	-- 韩当
-	["$gongqi1"] = "鼠辈，哪里走！",
-	["$gongqi2"] = "吃我一箭！",
-	["$jiefan1"] = "休想趁人之危！",
-	["$jiefan2"] = "退后，这里交给我！",
-	["~handang"] = "今后，只能靠你了……",
+	["$handanggongqi1"] = "吃我一箭",
+	["$handanggongqi2"] = "鼠辈，哪里走",
+	["$handangjiefan1"] = "退后，这里交给我",
+	["$handangjiefan2"] = "休想趁人之危",
+	["~handang"] = "今后，只能靠你了",
 
 	-- 华雄
-	["cv:huaxiong"] = "玉皇贰弟",
-	["$shiyong1"] = "都是小伤，不必理会！",
-	["$shiyong2"] = "这厮好大的力气！",
-	["$shiyong3"] = "唉，这厮不易对付！", -- 关羽
-	["~huaxiong"] = "太自负了么……",
+	["$huaxiongshiyong1"] = "好大一股杀气啊",
+	["$huaxiongshiyong2"] = "好大一股酒气啊",
+	["~huaxiong"] = "皮厚不挡刀啊",
 
 	-- 廖化
-	["cv:liaohua"] = "风叹息",
-	["$dangxian"] = "先锋一职，老夫责无旁贷。",
-	["$fuli"] = "心系蜀汉，虽死必归。",
-	["~liaohua"] = "阅尽兴亡，此生无憾矣……",
+	["$liaohuadangxian1"] = "先锋就由老夫来当",
+	["$liaohuadangxian2"] = "看我先行破敌",
+	["$liaohuafuli1"] = "有老夫在，蜀汉就不会倒下",
+	["$liaohuafuli2"] = "今天是个拼命的好日子,哈哈哈哈",
+	["~liaohua"] = "今后，就靠你们了",
 
 	-- 刘表
-	["cv:liubiao"] = "喵小林",
-	["$zishou1"] = "退以自保，静观时变！",
-	["$zishou2"] = "荆州沃土，自守足矣。",
-	["$zishou3"] = "余粮甚厚，不急出兵。",
-	["~liubiao"] = "不欲争天下，奈何……",
+	["$liubiaozishou1"] = "江河霸主，何惧之有",
+	["$liubiaozishou2"] = "荆襄之地，固若金汤",
+	["~liubiao"] = "优柔寡断，要不得啊",
 
 	-- 马岱
-	["cv:madai"] = "风叹息",
-	["$qianxi"] = "（拔剑声）我敢杀你！",
-	["~madai"] = "未能完成丞相遗命，辱没了我马家的威名啊……",
+	["$madaiqianxi1"] = "喊什么喊，我敢杀你",
+	["$madaiqianxi2"] = "笑什么笑，叫你得意",
+	["~madai"] = "我怎么会，死在这里",
 
 	-- 王异
-	["cv:wangyi"] = "蒲小猫",
-	["$zhenlie1"] = "雪君父之大耻，虽丧身亦不惜。",
-	["$zhenlie2"] = "顾子而不行，不如先死矣。",
-	["$miji1"] = "有此九奇，可逐羌敌。",
-	["$miji2"] = "屯兵逐超，得保冀城。", -- 给牌后
-	["$miji3"] = "救兵已到，乃解城围。", -- 给牌后
-	["~wangyi"] = "吾之家仇，何日得报？",
+	["$wangyizhenlie1"] = "为雪前耻，不惜吾身",
+	["$wangyizhenlie2"] = "虽是妇人，亦当奋身一搏",
+	["$wangyimiji2"] = "此计，可奸敌精锐",
+	["$wangyimiji1"] = "此举，可破敌之围",
+	["~wangyi"] = "月儿，不要责怪你爹爹",
 
 	-- 荀攸
-	["cv:xunyou"] = "烨子",
-	["$qice1"] = "臣有一计，定能一攻而破！",
-	["$qice2"] = "方今天下大乱，智士劳心之时也！",
-	["$zhiyu1"] = "将军苦苦追逼，是为何故？",
-	["$zhiyu2"] = "智可及，愚不可及。",
-	["~xunyou"] = "主公何日再得无忧。",
+	["$xunyouqice1"] = "倾力为国，算无遗策",
+	["$xunyouqice2"] = "奇策在此，谁与争锋",
+	["$xunyouzhiyu1"] = "大勇若怯，大智如愚",
+	["$xunyouzhiyu2"] = "愚者既出，智者何存",
+	["~xunyou"] = "主公，臣下，先行告退",
+	
+	-- 新·刘表
+	["$new_liubiaonewzishou1"] = "江河霸主，何惧之有",
+	["$new_liubiaonewzishou2"] = "荆襄之地，固若金汤",
+	["~new_liubiao"] = "优柔寡断，要不得啊",
 }

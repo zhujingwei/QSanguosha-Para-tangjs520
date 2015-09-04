@@ -78,6 +78,7 @@ public:
     ~MainWindow();
     void setBackgroundBrush(bool center_as_origin);
 
+    bool isConsoleStart() const { return m_consoleStart; }
     void forceRestart();
     const QString &getReplayPath() const { return m_replayPath; }
     void deleteClient();
@@ -98,6 +99,7 @@ private:
     QByteArray m_lastPosBeforeFullScreen;
     Server *m_server;
     Client *m_client;
+    bool m_consoleStart;    //标识是否为单机启动，默认为true(单机启动)
     GeneralOverview *m_generalOverview;
     CardOverview *m_cardOverview;
     QString m_replayPath;
@@ -117,6 +119,7 @@ private slots:
     void on_actionAbout_Lua_triggered();
     void on_actionAbout_fmod_triggered();
     void on_actionReplay_file_convert_triggered();
+    void on_actionPC_Console_Start_triggered();
     void on_actionRecord_analysis_triggered();
     void on_actionAcknowledgement_triggered();
     void on_actionBroadcast_triggered();
@@ -143,6 +146,8 @@ private slots:
     void startGameInAnotherInstance();
     void changeBackground();
     void on_actionView_ban_list_triggered();
+
+    void setConsoleStartFalse();
 };
 
 #endif

@@ -29,6 +29,7 @@
     </property>
     <addaction name="actionStart_Server"/>
     <addaction name="actionStart_Game"/>
+    <addaction name="actionPC_Console_Start"/>
     <addaction name="actionReplay"/>
     <addaction name="actionExit"/>
    </widget>
@@ -66,7 +67,7 @@
     <addaction name="actionAbout_Lua"/>
     <addaction name="actionAbout_fmod"/>
     <addaction name="separator"/>
-    <addaction name="actionAcknowledgement"/>
+    <addaction name="actionAcknowledgement_2"/>
     <addaction name="separator"/>
     <addaction name="actionRole_assign_table"/>
    </widget>
@@ -248,9 +249,22 @@
     <string>Scenario overview</string>
    </property>
   </action>
+  <action name="actionScript_editor">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Script editor</string>
+   </property>
+  </action>
   <action name="actionBroadcast">
    <property name="text">
     <string>Broadcast ...</string>
+   </property>
+  </action>
+  <action name="actionAcknowledgement">
+   <property name="text">
+    <string>Acknowledgement</string>
    </property>
   </action>
   <action name="actionDamage_maker">
@@ -259,6 +273,14 @@
    </property>
    <property name="text">
     <string>Damage maker</string>
+   </property>
+  </action>
+  <action name="actionExpand_dashboard">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Expand dashboard</string>
    </property>
   </action>
   <action name="actionDeath_note">
@@ -271,9 +293,19 @@
     <string>Revive wand ...</string>
    </property>
   </action>
+  <action name="actionPC_Console_Start">
+   <property name="text">
+    <string>PC Console Start</string>
+   </property>
+  </action>
   <action name="actionReplay_file_convert">
    <property name="text">
     <string>Replay file convert ...</string>
+   </property>
+  </action>
+  <action name="actionSend_lowlevel_command">
+   <property name="text">
+    <string>Send lowlevel command ...</string>
    </property>
   </action>
   <action name="actionView_ban_list">
@@ -314,7 +346,7 @@
     <string>Never nullify my trick</string>
    </property>
   </action>
-  <action name="actionAcknowledgement">
+  <action name="actionAcknowledgement_2">
    <property name="text">
     <string>Acknowledgement</string>
    </property>

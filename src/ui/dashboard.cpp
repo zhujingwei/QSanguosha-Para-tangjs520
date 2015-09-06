@@ -33,7 +33,7 @@ Dashboard::Dashboard(QGraphicsPixmapItem *widget)
 
     animations = new EffectAnimation(this);
     pending_card = NULL;
-
+    _m_pile_expanded = QMap<QString, QList<int> >();
     for (int i = 0; i < S_EQUIP_AREA_LENGTH; ++i) {
         _m_equipSkillBtns[i] = NULL;
         _m_isEquipsAnimOn[i] = false;
@@ -406,10 +406,7 @@ void Dashboard::selectCard(CardItem *item, bool isSelected) {
     QPointF newPos = oldPos;
     newPos.setY(newPos.y() + (isSelected ? 1 : -1) * S_PENDING_OFFSET_Y);
     item->setHomePos(newPos);
-
-    if (isSelected) {
-        selected = item;
-    }
+    selected = item;
 
     m_mutex.unlock();
 }
@@ -819,6 +816,7 @@ QList<CardItem *> Dashboard::removeHandCards(const QList<int> &card_ids) {
 QList<CardItem *> Dashboard::removeCardItems(const QList<int> &card_ids, Player::Place place) {
     CardItem *card_item = NULL;
     QList<CardItem *> result;
+    bool pileNeedAdjust = false;
     if (place == Player::PlaceHand)
         result = removeHandCards(card_ids);
     else if (place == Player::PlaceEquip)
@@ -830,6 +828,27 @@ QList<CardItem *> Dashboard::removeCardItems(const QList<int> &card_ids, Player:
             card_item = _createCard(card_id);
             card_item->setOpacity(0.0);
             result.push_back(card_item);
+
+            foreach (const QList<int> &expanded, _m_pile_expanded) {
+                if (expanded.contains(card_id)) {
+                    QString key = _m_pile_expanded.key(expanded);
+                    if (key.isEmpty())
+                        continue;
+
+                    _m_pile_expanded[key].removeOne(card_id);
+
+                    CardItem *card_item = CardItem::FindItem(m_handCards, card_id);
+                    if (card_item == selected) selected = NULL;
+                    Q_ASSERT(card_item);
+                    if (card_item) {
+                        m_handCards.removeOne(card_item);
+                        card_item->disconnect(this);
+                        delete card_item;
+                        card_item = NULL;
+                    }
+                    pileNeedAdjust = true;
+                }
+            }
         }
     } else
         Q_ASSERT(false);
@@ -855,6 +874,9 @@ QList<CardItem *> Dashboard::removeCardItems(const QList<int> &card_ids, Player:
             Q_ASSERT(false);
         rect.moveCenter(center.toPoint());
         _disperseCards(result, rect, Qt::AlignCenter, false, false);
+
+        if (place == Player::PlaceSpecial && pileNeedAdjust)
+            adjustCards();
     }
     update();
     return result;
@@ -998,8 +1020,10 @@ void Dashboard::stopPending() {
         if (view_as_skill->objectName().contains("guhuo")) {
             foreach (CardItem *item, m_handCards)
                 item->hideFootnote();
-        } else if (!view_as_skill->getExpandPile().isEmpty()) {
-            retractPileCards(view_as_skill->getExpandPile());
+        } 
+        if (!view_as_skill->getExpandPile().isEmpty()) {
+            foreach (const QString &pile_name, view_as_skill->getExpandPile().split(","))
+                retractPileCards(pile_name);
         }
     }
     view_as_skill = NULL;
@@ -1032,7 +1056,6 @@ void Dashboard::stopPending() {
 
 void Dashboard::expandPileCards(const QString &pile_name) {
     if (_m_pile_expanded.contains(pile_name)) return;
-    _m_pile_expanded << pile_name;
     QString new_name = pile_name;
     QList<int> pile;
     if (new_name.startsWith("%")) {
@@ -1049,22 +1072,16 @@ void Dashboard::expandPileCards(const QString &pile_name) {
     move.to_place = Player::PlaceHand;
     move.from_pile_name = Sanguosha->translate(new_name);
     addCardItems(card_items, move);
+    _m_pile_expanded[pile_name] = pile;
 }
 
 void Dashboard::retractPileCards(const QString &pile_name) {
     if (!_m_pile_expanded.contains(pile_name)) return;
-    _m_pile_expanded.removeOne(pile_name);
     QString new_name = pile_name;
-    QList<int> pile;
-    if (new_name.startsWith("%")) {
-        new_name = new_name.mid(1);
-        foreach(const Player *p, Self->getAliveSiblings())
-            pile += p->getPile(new_name);
-    } else {
-        pile = Self->getPile(new_name);
-    }
+    QList<int> pile = _m_pile_expanded.value(new_name);
+    _m_pile_expanded.remove(pile_name);
     if (pile.isEmpty()) return;
-    CardItem *card_item;
+    CardItem *card_item = NULL;
     foreach (int card_id, pile) {
         card_item = CardItem::FindItem(m_handCards, card_id);
         if (card_item == selected) selected = NULL;
@@ -1082,7 +1099,7 @@ void Dashboard::retractPileCards(const QString &pile_name) {
 
 void Dashboard::retractAllSkillPileCards()
 {
-    foreach (const QString &pileName, _m_pile_expanded) {
+    foreach (const QString &pileName, _m_pile_expanded.keys()) {
         if (!(pileName.startsWith("&") || pileName == "wooden_ox"))
             retractPileCards(pileName);
     }
@@ -1153,15 +1170,15 @@ void Dashboard::updatePending() {
             pending_card = NULL;
         }
         if (view_as_skill->objectName().contains("guhuo")
-            && Sanguosha->getCurrentCardUseReason() == CardUseStruct::CARD_USE_REASON_PLAY) {
-            foreach (CardItem *item, m_handCards) {
-                item->hideFootnote();
-                if (new_pending_card && item->getCard() == cards.first()) {
-                    const SkillCard *guhuo = qobject_cast<const SkillCard *>(new_pending_card);
-                    item->setFootnote(Sanguosha->translate(guhuo->getUserString()));
-                    item->showFootnote();
+            && Sanguosha->currentRoomState()->getCurrentCardUseReason() == CardUseStruct::CARD_USE_REASON_PLAY) {
+                foreach (CardItem *item, m_handCards) {
+                    item->hideFootnote();
+                    if (new_pending_card && item->getCard() == cards.first()) {
+                        const SkillCard *guhuo = qobject_cast<const SkillCard *>(new_pending_card);
+                        item->setFootnote(Sanguosha->translate(guhuo->getUserString()));
+                        item->showFootnote();
+                    }
                 }
-            }
         }
         pending_card = new_pending_card;
         emit card_selected(pending_card);
@@ -1171,9 +1188,8 @@ void Dashboard::updatePending() {
 void Dashboard::clearPendings()
 {
     selected = NULL;
-    foreach (CardItem *item, m_handCards) {
+    foreach (CardItem *item, m_handCards)
         selectCard(item, false);
-    }
     pendings.clear();
 }
 

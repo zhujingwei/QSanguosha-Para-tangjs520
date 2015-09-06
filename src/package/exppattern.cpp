@@ -1,11 +1,13 @@
 #include "exppattern.h"
 #include "engine.h"
 
-ExpPattern::ExpPattern(const QString &exp) {
+ExpPattern::ExpPattern(const QString &exp)
+{
     this->exp = exp;
 }
 
-bool ExpPattern::match(const Player *player, const Card *card) const{
+bool ExpPattern::match(const Player *player, const Card *card) const
+{
     foreach (QString one_exp, this->exp.split('#'))
         if (this->matchOne(player, card, one_exp)) return true;
 
@@ -13,12 +15,16 @@ bool ExpPattern::match(const Player *player, const Card *card) const{
 }
 
 // '|' means 'and', '#' means 'or'.
-// the expression splited by '#' has 3 parts,
+// the expression splited by '|' has 4 parts,
 // 1st part means the card name, and ',' means more than one options.
 // 2nd patt means the card suit, and ',' means more than one options.
 // 3rd part means the card number, and ',' means more than one options,
 // the number uses '~' to make a scale for valid expressions
-bool ExpPattern::matchOne(const Player *player, const Card *card, QString exp) const{
+// 4th part means the card place, and ',' means more than one options,
+// "hand" stands for handcard and "equipped" stands for the cards in the placeequip
+// if it is neigher "hand" nor "equipped", it stands for the pile the card is in.
+bool ExpPattern::matchOne(const Player *player, const Card *card, QString exp) const
+{
     QStringList factors = exp.split('|');
 
     bool checkpoint = false;
@@ -52,7 +58,9 @@ bool ExpPattern::matchOne(const Player *player, const Card *card, QString exp) c
     checkpoint = false;
     QStringList card_suits = factors.at(1).split(',');
     foreach (QString suit, card_suits) {
-        if (suit == ".") { checkpoint = true; break; }
+        if (suit == ".") {
+            checkpoint = true; break;
+        }
         bool positive = true;
         if (suit.startsWith('^')) {
             positive = false;
@@ -74,7 +82,9 @@ bool ExpPattern::matchOne(const Player *player, const Card *card, QString exp) c
     int cdn = card->getNumber();
 
     foreach (QString number, card_numbers) {
-        if (number == ".") { checkpoint = true; break; }
+        if (number == ".") {
+            checkpoint = true; break;
+        }
         bool isInt = false;
         if (number.contains('~')) {
             QStringList params = number.split('~');
@@ -92,10 +102,10 @@ bool ExpPattern::matchOne(const Player *player, const Card *card, QString exp) c
         } else if (number.toInt(&isInt) == cdn && isInt) {
             checkpoint = true;
         } else if ((number == "A" && cdn == 1)
-                   || (number == "J" && cdn == 11)
-                   || (number == "Q" && cdn == 12)
-                   || (number == "K" && cdn == 13)) {
-            checkpoint = true;
+            || (number == "J" && cdn == 11)
+            || (number == "Q" && cdn == 12)
+            || (number == "K" && cdn == 13)) {
+                checkpoint = true;
         }
         if (checkpoint) break;
     }
@@ -115,7 +125,8 @@ bool ExpPattern::matchOne(const Player *player, const Card *card, QString exp) c
             foreach (int id, ids) {
                 checkpoint = false;
                 const Card *card = Sanguosha->getCard(id);
-                foreach (QString p, place.split(",")) {
+                foreach (const QString &_p, place.split(",")) {
+                    QString p = _p;
                     if (p == "equipped" && player->hasEquip(card)) {
                         checkpoint = true;
                     } else if (p == "hand" && card->getEffectiveId() >= 0) {

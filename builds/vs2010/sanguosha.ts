@@ -2845,7 +2845,7 @@
 <context>
     <name>Room</name>
     <message>
-        <location filename="../../src/server/room.cpp" line="6177"/>
+        <location filename="../../src/server/room.cpp" line="6178"/>
         <source>disconnected</source>
         <translation>断开</translation>
     </message>
@@ -2856,7 +2856,7 @@
         <translation>电脑 %1</translation>
     </message>
     <message>
-        <location filename="../../src/server/room.cpp" line="6197"/>
+        <location filename="../../src/server/room.cpp" line="6198"/>
         <source>&lt;font color=#000000&gt;Player &lt;b&gt;%1&lt;/b&gt; left the game&lt;/font&gt;</source>
         <translation>&lt;font color=#000000&gt;玩家 %1 离开了游戏&lt;/font&gt;</translation>
     </message>
@@ -2898,7 +2898,7 @@
 %1</translation>
     </message>
     <message>
-        <location filename="../../src/server/room.cpp" line="6031"/>
+        <location filename="../../src/server/room.cpp" line="6032"/>
         <source>&lt;font color=#EEB422&gt;The network delay of player &lt;b&gt;%1&lt;/b&gt; is %2 milliseconds.&lt;/font&gt;</source>
         <translation>&lt;font color=#EEB422&gt;玩家 &lt;b&gt;%1&lt;/b&gt; 的网络延迟为 %2 毫秒&lt;/font&gt;</translation>
     </message>

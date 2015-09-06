@@ -5781,52 +5781,8 @@ void Room::showAllCards(ServerPlayer *player, ServerPlayer *to) {
     if (player->isKongcheng())
         return;
     tryPause();
-
-    Json::Value gongxinArgs(Json::arrayValue);
-    gongxinArgs[0] = toJsonString(player->objectName());
-    gongxinArgs[1] = false;
-    gongxinArgs[2] = toJsonArray(player->handCards());
-
-    bool isUnicast = (to != NULL);
-
-    foreach (int cardId, player->handCards()) {
-        WrappedCard *card = Sanguosha->getWrappedCard(cardId);
-        if (card->isModified()) {
-            if (isUnicast)
-                notifyUpdateCard(to, cardId, card);
-            else
-                broadcastUpdateCard(getOtherPlayers(player), cardId, card);
-        } else {
-            if (isUnicast)
-                notifyResetCard(to, cardId);
-            else
-                broadcastResetCard(getOtherPlayers(player), cardId);
-        }
-    }
-
-    if (isUnicast) {
-        LogMessage log;
-        log.type = "$ViewAllCards";
-        log.from = to;
-        log.to << player;
-        log.card_str = IntList2StringList(player->handCards()).join("+");
-        sendLog(log, to);
-
-        QVariant decisionData = QVariant::fromValue("viewCards:" + to->objectName() + ":" + player->objectName());
-        thread->trigger(ChoiceMade, this, to, decisionData);
-
-        doNotify(to, S_COMMAND_SHOW_ALL_CARDS, gongxinArgs);
-    } else {
-        LogMessage log;
-        log.type = "$ShowAllCards";
-        log.from = player;
-        foreach (int card_id, player->handCards())
-            Sanguosha->getCard(card_id)->setFlags("visible");
-        log.card_str = IntList2StringList(player->handCards()).join("+");
-        sendLog(log);
-
-        doBroadcastNotify(getOtherPlayers(player), S_COMMAND_SHOW_ALL_CARDS, gongxinArgs);
-    }
+    foreach (int cardId, player->handCards()) 
+        showCard(player, cardId);
 }
 
 void Room::retrial(const Card *card, ServerPlayer *player, JudgeStruct *judge, const QString &skill_name, bool exchange) {

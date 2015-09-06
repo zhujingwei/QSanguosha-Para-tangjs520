@@ -52,6 +52,7 @@ public:
             && (pattern == "slash" || pattern == "jink")
             && room->askForSkillInvoke(player, objectName(), data)) {
                 QList<int> ids = room->getNCards(2, false);
+
                 QList<int> enabled, disabled;
                 foreach (int id, ids) {
                     if (Sanguosha->getCard(id)->objectName().contains(pattern))
@@ -79,6 +80,7 @@ public:
 
         player->broadcastSkillInvoke("aocai");
         room->notifySkillInvoked(player, "aocai");
+
         if (enabled.isEmpty()) {
             Json::Value arg(Json::arrayValue);
             arg[0] = QSanProtocol::Utils::toJsonString(".");
@@ -1016,8 +1018,8 @@ public:
     BushiVS() : OneCardViewAsSkill("bushi")
     {
         response_pattern = "@@bushi";
-        filter_pattern = ".|.|.|%rice";
-        expand_pile = "%rice";
+        filter_pattern = ".|.|.|rice,%rice";
+        expand_pile = "rice,%rice";
     }
 
     const Card *viewAs(const Card *card) const
@@ -1043,16 +1045,19 @@ public:
             return false;
 
         DamageStruct damage = data.value<DamageStruct>();
-        ServerPlayer *p;
-        if (triggerEvent == Damage)
-            p = damage.to;
-        else
-            p = damage.from;
-        if (p->objectName() == player->objectName())
+        ServerPlayer *p = damage.to;
+
+        if (damage.from->isDead() || damage.to->isDead())
             return false;
 
-        if (room->askForUseCard(p, "@@bushi", "@bushi", -1, Card::MethodNone))
+        for (int i = 0; i < damage.damage; ++i) {
+            if (!room->askForUseCard(p, "@@bushi", "@bushi", -1, Card::MethodNone))
+                break;
             room->notifySkillInvoked(player, objectName());
+
+            if (p->isDead() || player->getPile("rice").isEmpty())
+                break;
+        }
 
         return false;
     }

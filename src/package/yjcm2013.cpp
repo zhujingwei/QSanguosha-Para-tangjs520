@@ -516,8 +516,10 @@ bool XiansiCard::targetFilter(const QList<const Player *> &targets, const Player
 
 void XiansiCard::onEffect(const CardEffectStruct &effect) const
 {
+    Room *room = effect.from->getRoom();
     if (effect.to->isNude()) return;
-    int id = effect.from->getRoom()->askForCardChosen(effect.from, effect.to, "he", "xiansi");
+    int id = room->askForCardChosen(effect.from, effect.to, "he", "xiansi");
+    room->showCard(effect.to, id);
     effect.from->addToPile("counter", id);
 }
 

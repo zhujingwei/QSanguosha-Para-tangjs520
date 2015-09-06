@@ -172,8 +172,8 @@
     // otherwise, the corner of child specified by "childAnchor" will first be aligned to that of parent specified by "parentAnchor",
     // and offset if applied after the alignment is done. When the 4th parameter [sizeX, sizeY] is specified, fixed size of the area
     // is used; otherwise, it means area's size is variable with the content of that area, the program will adjust the size automatically
-    "markTextArea": ["bottomRight", "bottomRight",  [-10, -10]],
-    "phaseArea": ["bottomRight", "bottomRight", [-100, 2], [209, 18]],
+    "markTextArea": ["bottomRight", "bottomRight",  [-60, 15]],
+    "phaseArea": ["bottomRight", "bottomRight", [-150, 20], [209, 18]],
     "kingdomIconArea": [-63, 1, 28, 25],
     "kingdomMaskArea": [-61, 5, 87, 21],
     "screenNameArea": [0, 0, 157, 25],
@@ -186,9 +186,9 @@
     "cardMoveArea": [-50, 65, 200, 130],
     "skillNameArea": [25, 30, 300, 50],
     "skillNameFont": ["SimLi", 30, 0, [255, 255, 255, 255], 2, 20, [0, 0], [255, 0, 0, 128]],
-    "progressBarArea": ["bottomCenter", "bottomCenter", [-8, 0], [262, 15]],
+    "progressBarArea": ["bottomCenter", "bottomCenter", [-58, 0], [262, 15]],
     "progressBarHorizontal": true,
-    "privatePileStartPos": [28, 3],
+    "privatePileStartPos": [28, 23],
     "privatePileStep": [0, 16],
     "privatePileButtonSize": [75, 16],
     "actionedIconRegion": [84, 30, 52, 21],
@@ -212,7 +212,7 @@
 "skillButton":
 {
     "height": 26,
-    "width": [134, 67, 45],
+    "width": [134, 67],
     "textArea": [[23, 2, 112, 20], [19, 2, 44, 20], [11, 2, 35, 20]],
     "textAreaDown": [[23, 2, 112, 20], [19, 2, 44, 20], [11, 2, 35, 20]],
     "textFont": [["simkai", [15, 15, 10], 50, [0, 0, 0, 255], 1, 1, [0, 0], [255, 255, 190, 128]],  // wide

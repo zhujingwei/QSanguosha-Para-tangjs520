@@ -1200,10 +1200,6 @@ void RoomScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
 }
 
 void RoomScene::enableTargets(const Card *card) {
-    foreach (PlayerCardContainer *item, item2player.keys()) {
-        item->hideSkillName();
-    }
-
     bool enabled = true;
     if (card != NULL) {
         Client::Status status = ClientInstance->getStatus();
